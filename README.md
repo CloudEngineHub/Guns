@@ -109,7 +109,11 @@ Guns是一个现代化的Java应用开发框架，基于主流技术**Spring Boo
 
 主项目：[https://gitee.com/stylefeng/guns](https://gitee.com/stylefeng/guns)
 
+主项目GitCode地址：[https://gitcode.com/javaguns/guns](https://gitcode.com/javaguns/guns)
+
 核心包：[https://gitee.com/stylefeng/roses](https://gitee.com/stylefeng/roses)
+
+核心包GitCode地址：[https://gitcode.com/javaguns/roses](https://gitcode.com/javaguns/roses)
 
 经过多年发展，Guns已在业界具有一定影响力。Guns技术架构可以直接应用到任何软件产品和技术公司自身的技术体系建设中，帮助企业解决**规范问题**，解决**复用问题**，解决**架构问题**。
 
