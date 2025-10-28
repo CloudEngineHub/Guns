@@ -20,6 +20,12 @@
 
 -----------------------------------------------------------------------------------------------
 
+## Gitee 2025开源项目评选投票
+
+![](.README_images/开源评选图.png)
+
+Guns正在参加2025 Gitee开源项目评选，开源不易，每一票都是继续免费迭代下去的动力！ [请点击投票](https://gitee.com/activity/2025opensource?ident=IEHM4J)
+
 ## 官方网站
 
 [https://www.javaguns.com/](https://www.javaguns.com/)
