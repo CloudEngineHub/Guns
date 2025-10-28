@@ -165,7 +165,7 @@ const props = defineProps({
   goHome: Function
 });
 
-const emits = defineEmits(['update:visible']);
+const emits = defineEmits(['update:visible', 'done']);
 // 弹框加载
 const loading = ref(false);
 
@@ -478,10 +478,9 @@ const submit = data => {
         .catch(e => {
           getVertifyData();
           dragReset();
-        })
-        .finally(() => {
           loading.value = false;
-        });
+        })
+        .finally(() => {});
     }
 
     // 没开启单点登录，正常走登录接口逻辑
@@ -500,10 +499,9 @@ const submit = data => {
         .catch(e => {
           getVertifyData();
           dragReset();
-        })
-        .finally(() => {
           loading.value = false;
-        });
+        })
+        .finally(() => {});
     }
   });
 };
@@ -521,6 +519,7 @@ const closeModal = (type, data) => {
     message.warning(`已连续错误达 ${params.check.num} 次，请稍候再试`);
   } else {
     updateVisible(false);
+    emits('done');
   }
 };
 </script>

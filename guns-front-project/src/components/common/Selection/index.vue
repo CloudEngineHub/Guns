@@ -1,15 +1,17 @@
 <template>
-  <a-modal
+  <common-modal
     :width="props.width"
     :visible="props.visible"
     :confirm-loading="loading"
-    :body-style="{ paddingBottom: '8px', height: 'calc(100vh - 400px)', overflowY: 'auto', minHeight: '700px' }"
+    :body-style="{ paddingBottom: '8px' }"
     @ok="save"
     :title="title"
+    style="top: 40px"
     @cancel="updateVisible(false)"
     :footer="footer"
+    maxable
     :maskClosable="false"
-    wrapClassName="selection-modal"
+    wrapClassName="project-modal h80 selection-modal"
     v-if="visible"
   >
     <div class="box">
@@ -25,8 +27,8 @@
         <!-- 公司选择 -->
         <select-company
           ref="companyRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'company'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('company') !== -1"
@@ -34,8 +36,8 @@
         <!-- 用户选择 -->
         <select-user
           ref="userRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'user'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('user') !== -1"
@@ -43,8 +45,8 @@
         <!-- 部门选择 -->
         <select-dept
           ref="deptRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'dept'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('dept') !== -1"
@@ -52,8 +54,8 @@
         <!-- 角色选择 -->
         <select-role
           ref="roleRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'role'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('role') !== -1"
@@ -61,8 +63,8 @@
         <!-- 职位选择 -->
         <select-position
           ref="positionRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'position'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('position') !== -1"
@@ -70,26 +72,26 @@
         <!-- 字典选择 -->
         <select-dicts
           ref="dictRef"
-          :isShowTab="isShowTab"
           :isRadio="props.isRadio"
+          :isMobileFlag="isMobileFlag"
           v-show="activeKey === 'dict'"
           @selectedChange="selectedChange"
           v-if="showTab.length === 0 || showTab.indexOf('dict') !== -1"
         />
       </div>
     </div>
-  </a-modal>
+  </common-modal>
 </template>
 
 <script setup name="Selection">
 import { message } from 'ant-design-vue/es';
-import { onMounted, ref, watch, nextTick } from 'vue';
+import { onMounted, ref, watch, nextTick, onUnmounted, computed } from 'vue';
 
 const props = defineProps({
   // 宽度
   width: {
     type: String,
-    default: '60%'
+    default: '70%'
   },
   // 弹框状态
   visible: Boolean,
@@ -103,7 +105,7 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  // 需要显示的tab列表，有 company; user; dept; approver; role; position; relation; 默认是全部显示
+  // 需要显示的tab列表，有 company; user; dept; role; position; 默认是全部显示
   showTab: {
     type: Array,
     default: () => []
@@ -153,20 +155,12 @@ const allTablist = ref([
     name: '部门'
   },
   {
-    key: 'approver',
-    name: '部门审批人'
-  },
-  {
     key: 'role',
     name: '角色'
   },
   {
     key: 'position',
     name: '职位'
-  },
-  {
-    key: 'relation',
-    name: '关系'
   },
   {
     key: 'dict',
@@ -181,18 +175,32 @@ const isShowTab = ref(false);
 // ref
 const userRef = ref(null);
 const deptRef = ref(null);
-const approverRef = ref(null);
 const roleRef = ref(null);
 const positionRef = ref(null);
-const relationRef = ref(null);
 const contentRef = ref(null);
 const companyRef = ref(null);
 const dictRef = ref(null);
 
+const windowWidth = ref(window.innerWidth);
+
+// 是否是移动端
+const isMobileFlag = computed(() => {
+  return windowWidth.value <= 768 ? true : false;
+});
+
 onMounted(() => {
   getTabList();
   getDetail();
+  window.addEventListener('resize', updateWindowWidth);
 });
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateWindowWidth);
+});
+
+const updateWindowWidth = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 // 获取当前需要展示的tab列表
 const getTabList = () => {
@@ -225,10 +233,8 @@ const setData = data => {
   companyRef.value ? (companyRef.value.companyList = data?.selectCompanyList ? data.selectCompanyList : []) : '';
   userRef.value ? (userRef.value.userList = data?.selectUserList ? data.selectUserList : []) : '';
   deptRef.value ? (deptRef.value.deptList = data?.selectOrgList ? data.selectOrgList : []) : '';
-  approverRef.value ? (approverRef.value.approverList = data?.selectOrgApproverTypeList ? data.selectOrgApproverTypeList : []) : '';
   roleRef.value ? (roleRef.value.roleList = data?.selectRoleList ? data.selectRoleList : []) : '';
   positionRef.value ? (positionRef.value.positionList = data?.selectPositionList ? data.selectPositionList : []) : '';
-  relationRef.value ? (relationRef.value.relationList = data?.selectRelationList ? data.selectRelationList : []) : '';
   dictRef.value ? (dictRef.value.dictList = data?.selectDictList ? data.selectDictList : []) : '';
   selectedChange();
 };
@@ -238,12 +244,10 @@ const selectedChange = () => {
   let companyName = companyRef.value ? getName(companyRef.value.companyList, 'company') : '';
   let userName = userRef.value ? getName(userRef.value.userList, 'user') : '';
   let deptName = deptRef.value ? getName(deptRef.value.deptList, 'dept') : '';
-  let approverName = approverRef.value ? getName(approverRef.value.approverList, 'approver') : '';
   let roleName = roleRef.value ? getName(roleRef.value.roleList, 'role') : '';
   let positionName = positionRef.value ? getName(positionRef.value.positionList, 'position') : '';
-  let relationName = relationRef.value ? getName(relationRef.value.relationList, 'relation') : '';
   let dictName = dictRef.value ? getName(dictRef.value.dictList, 'dict') : '';
-  userGroupDetailName.value = userName + deptName + approverName + roleName + positionName + relationName + companyName + dictName;
+  userGroupDetailName.value = userName + deptName + roleName + positionName + companyName + dictName;
 };
 
 // 获取名字
@@ -251,7 +255,7 @@ const getName = (list, flag) => {
   let name = '';
   if (list && list.length > 0) {
     list.forEach(item => {
-      if (item.subValueName && (flag == 'approver' || flag == 'position' || flag == 'user' || flag == 'dept')) {
+      if (item.subValueName && (flag == 'position' || flag == 'user' || flag == 'dept')) {
         name += item.subValueName + '#' + item.name + ';';
       } else {
         name += item.name + ';';
@@ -262,14 +266,10 @@ const getName = (list, flag) => {
       addName = '【用户】';
     } else if (flag == 'dept') {
       addName = '【部门】';
-    } else if (flag == 'approver') {
-      addName = '【部门审批人】';
     } else if (flag == 'role') {
       addName = '【角色】';
     } else if (flag == 'position') {
       addName = '【职位】';
-    } else if (flag == 'relation') {
-      addName = '【关系】';
     } else if (flag == 'company') {
       addName = '【公司】';
     } else if (flag == 'dict') {
@@ -292,10 +292,8 @@ const save = () => {
     selectCompanyList: companyRef.value ? companyRef.value.companyList : [], //选中的公司列表
     selectUserList: userRef.value ? userRef.value.userList : [], //选中的用户列表
     selectOrgList: deptRef.value ? deptRef.value.deptList : [], //选中的组织机构列表
-    selectOrgApproverTypeList: approverRef.value ? approverRef.value.approverList : [], //选中的部门审批人类型列表
     selectRoleList: roleRef.value ? roleRef.value.roleList : [], //选中的角色列表
     selectPositionList: positionRef.value ? positionRef.value.positionList : [], //选中的职位列表
-    selectRelationList: relationRef.value ? relationRef.value.relationList : [], //选中的关系列表
     selectDictList: dictRef.value ? dictRef.value.dictList : [], //选中的关系列表
     userGroupDetailName: userGroupDetailName.value //组合名称
   };
@@ -314,10 +312,6 @@ const save = () => {
       flag = maxSet(params, 'selectDictList');
     } else if ((tabList.value[0] = 'company')) {
       flag = maxSet(params, 'selectCompanyList');
-    } else if ((tabList.value[0] = 'relation')) {
-      flag = maxSet(params, 'selectRelationList');
-    } else if ((tabList.value[0] = 'approver')) {
-      flag = maxSet(params, 'selectOrgApproverTypeList');
     }
     if (!flag) return;
   }
@@ -344,9 +338,9 @@ const setHeight = () => {
     if (contentRef.value) {
       if (tabList.value.length >= 2) {
         isShowTab.value = true;
-        contentRef.value.style.height = 'calc(100% - 121px)';
+        contentRef.value.style.height = 'calc(100% - 140px)';
       } else {
-        contentRef.value.style.height = 'calc(100% - 60px)';
+        contentRef.value.style.height = 'calc(100% - 80px)';
         isShowTab.value = false;
       }
     }
@@ -415,6 +409,26 @@ watch(
     }
     .user-select {
       overflow-y: auto !important;
+    }
+    .guns-split-panel {
+      flex-direction: column;
+    }
+    .guns-split-panel-body {
+      transform: translateX(0) !important;
+      height: 100%;
+    }
+    .guns-split-panel > .guns-split-panel-body {
+      flex: none;
+      border-top: 1px solid rgba(197, 207, 209, 0.4);
+      padding-top: 16px;
+    }
+    .guns-split-panel.is-responsive:not(.is-vertical) > .guns-split-panel-wrap {
+      position: relative;
+      height: 100%;
+    }
+    .guns-split-panel.is-responsive:not(.is-vertical):not(.is-collapse) {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
     }
   }
 }

@@ -32,12 +32,12 @@
     <!-- 内容 -->
     <slot></slot>
     <!-- 关闭按钮 -->
-    <div class="close-button" @click="close" v-if="visible"><close-outlined /></div>
+    <div class="close-button" :style="{ right: closeBtnWidth }" @click="close" v-if="visible"><close-outlined /></div>
   </a-drawer>
 </template>
 
 <script setup name="CommonDrawer">
-import { useSlots, watch, ref, inject } from 'vue';
+import { useSlots, watch, ref, inject, computed } from 'vue';
 import { LAYOUT_KEY, screenWidth } from '../../layout/util';
 
 const slots = useSlots();
@@ -92,10 +92,10 @@ const props = defineProps({
     default: false
   },
   // 指定 Drawer 挂载的 HTML 节点
-  getContainer: {
-    type: [String, Boolean],
-    default: false
-  },
+  // getContainer: {
+  //   type: [String, Boolean],
+  //   default: false
+  // },
   // 用于设置 Drawer 头部的样式
   headerStyle: {
     type: Object,
@@ -182,6 +182,14 @@ const layoutProvide = inject(LAYOUT_KEY, ref({ isMobile: screenWidth() < 768 }))
 
 const isMobile = ref(false);
 
+const closeBtnWidth = computed(() => {
+  let val = props.width;
+  if (typeof props.width == 'number') {
+    val = val + 'px';
+  }
+  return val;
+});
+
 watch(
   () => layoutProvide.value,
   val => {
@@ -218,20 +226,19 @@ watch(
 
 <style lang="less" scoped>
 .close-button {
-  position: absolute;
-  left: -40px;
+  position: fixed;
   top: 180px;
   width: 40px;
   height: 40px;
   font-size: 22px;
-  background: #6F9AE7;
+  background: #6f9ae7;
   text-align: center;
   line-height: 40px;
   cursor: pointer;
   color: #fff;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
-  box-shadow: -2px 0px 4px 3px #0000001F;
+  box-shadow: -2px 0px 4px 3px #0000001f;
 }
 :deep(.ant-drawer-content) {
   overflow: visible;

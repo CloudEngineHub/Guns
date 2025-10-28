@@ -13,7 +13,7 @@
     class="common-modal"
     @close="updateVisible(false)"
   >
-    <org-form v-model:form="form" ref="orgFormRef" :isUpdate="isUpdate"></org-form>
+    <org-form v-model:form="form" ref="orgFormRef" :isUpdate="isUpdate" :levelNumberList="levelNumberList"></org-form>
   </a-modal>
 </template>
 
@@ -30,7 +30,9 @@ const props = defineProps({
   // 上机机构id
   parentId: String,
   // 上级机构名称
-  parentName: String
+  parentName: String,
+  // 层级数字列表
+  levelNumberList: Array,
 });
 
 const emits = defineEmits(['update:visible', 'done']);

@@ -73,16 +73,19 @@
             </a-input-group>
           </div>
           <div class="permission-left-body">
-            <div
-              :key="roleItem.roleId"
-              :tab="roleItem.roleName"
-              v-for="roleItem in roleList"
-              @click="leftChange(roleItem)"
-              :class="[{ 'role-select': activeKey == roleItem.roleId }]"
-              class="permission-left-body-item"
+            <a-directory-tree
+              :show-icon="selectSystemRoleId == 15 ? true : false"
+              v-model:selectedKeys="currentSelectKeys"
+              v-model:expandedKeys="expandedKeys"
+              @select="leftChange"
+              :tree-data="roleList"
+              :fieldNames="{ children: 'children', title: 'roleName', key: 'roleId', value: 'roleId' }"
             >
-              <span>{{ roleItem.roleName }}</span>
-            </div>
+              <template #icon="data">
+                <icon-font v-if="data?.nodeType == 1" icon-class="icon-tree-wenjianjia" color="#43505e" fontSize="24px"></icon-font>
+                <icon-font v-if="data?.nodeType == 2" icon-class="icon-menu-juese" color="#43505e" fontSize="24px"></icon-font>
+              </template>
+            </a-directory-tree>
             <a-empty v-show="roleList.length == 0" class="empty"></a-empty>
           </div>
         </div>
@@ -114,23 +117,29 @@
                         <a-table
                           :dataSource="perItem.children"
                           :columns="columns"
+                          v-model:expandedRowKeys="expandedRowKeys"
                           :pagination="false"
+                          :checkStrictly="true"
                           rowKey="nodeId"
                           bordered
                           size="small"
-                          childrenColumnName="other"
                         >
                           <template #bodyCell="{ column, record }">
                             <template v-if="column.dataIndex === 'page'">
-                              <a-checkbox v-model:checked="record.checked" @change="pageChange($event, record, perItem)">
+                              <a-checkbox
+                                v-model:checked="record.checked"
+                                v-if="record.leafFlag"
+                                @change="pageChange($event, record, perItem)"
+                              >
                                 {{ record.nodeName }}
                               </a-checkbox>
+                              <span v-else>{{ record.nodeName }}</span>
                             </template>
-                            <template v-else-if="column.dataIndex === 'use'">
+                            <template v-else-if="column.dataIndex === 'use' && record.functionList">
                               <a-checkbox
                                 v-model:checked="chlItem.checked"
-                                @change="useChange($event, chlItem, record, perItem)"
-                                v-for="chlItem in record.children"
+                                @change="useChange($event, chlItem, perItem)"
+                                v-for="chlItem in record.functionList"
                                 :key="chlItem.nodeId"
                               >
                                 {{ chlItem.nodeName }}
@@ -143,37 +152,78 @@
                   </div>
                 </div>
                 <!-- 数据权限 -->
-                <div v-if="rightActiveKey == 'data'">
-                  <a-form ref="formRef" :model="form" :rules="rules">
-                    <a-form-item label="数据切换:" name="dataScopeType">
-                      <a-radio-group v-model:value="form.dataScopeType" @change="dataScopeTypeChange">
-                        <a-radio :value="10">仅本人数据</a-radio>
-                        <a-radio :value="20">本部门数据</a-radio>
-                        <a-radio :value="30">本部门及以下部门</a-radio>
-                        <a-radio :value="31">本公司及以下数据</a-radio>
-                        <a-radio :value="40">指定部门</a-radio>
-                        <a-radio :value="50">全部数据</a-radio>
-                      </a-radio-group>
-                    </a-form-item>
-                    <a-form-item label="选择部门:" name="orgIdList" v-if="form.dataScopeType == 40">
-                      <div class="select">
-                        <plus-circle-outlined class="add-icon" @click="addClick" />
-                      </div>
-                      <div>
-                        <a-tag
-                          :closable="true"
-                          @close="logClose(valIndex)"
-                          color="blue"
-                          v-for="(valItem, valIndex) in form.orgIdListWaper"
-                          :key="valItem.bizId"
-                          >{{ valItem.name }}</a-tag
-                        >
-                      </div>
-                    </a-form-item>
-                    <a-form-item>
-                      <a-button type="primary" @click="saveClick" class="border-radius">保存</a-button>
-                    </a-form-item>
-                  </a-form>
+                <div v-if="rightActiveKey == 'data'" class="data-power">
+                  <common-table
+                    :columns="dataColumns"
+                    ref="tableRef"
+                    :where="where"
+                    rowKey="roleDataScopeId"
+                    size="middle"
+                    :isInit="false"
+                    :rowSelection="false"
+                    :showToolTotal="false"
+                    url="/roleDataScope/getRoleDataScopePageList"
+                  >
+                    <template #toolLeft>
+                      <a-input
+                        v-model:value="where.searchText"
+                        :bordered="false"
+                        allowClear
+                        size="small"
+                        placeholder="请输入关键字"
+                        @pressEnter="getRoleBindDataScope"
+                        style="width: 220px"
+                      >
+                        <template #prefix>
+                          <icon-font iconClass="icon-opt-search" />
+                        </template>
+                      </a-input>
+                    </template>
+                    <template #toolRight>
+                      <icon-font
+                        iconClass="icon-opt-tianjia"
+                        font-size="24px"
+                        title="新增"
+                        color="#60666b"
+                        @click="addEditDataPower()"
+                      ></icon-font>
+                    </template>
+                    <template #bodyCell="{ column, record, index }">
+                      <template v-if="column?.key == 'index'">{{ index + 1 }}</template>
+                      <template v-if="column?.dataIndex == 'dataScopeTypeWrapper'">
+                        <div class="td-item">
+                          <div class="td-label">
+                            {{ record.dataScopeTypeWrapper }}
+                          </div>
+                          <div class="td-btn">
+                            <a-space>
+                              <icon-font
+                                iconClass="icon-opt-bianji"
+                                font-size="24px"
+                                title="编辑"
+                                color="#60666b"
+                                @click="addEditDataPower(record)"
+                              />
+                              <icon-font
+                                iconClass="icon-opt-shanchu"
+                                font-size="24px"
+                                title="删除"
+                                color="#60666b"
+                                @click="removeDataPower(record)"
+                              />
+                            </a-space>
+                          </div>
+                        </div>
+                      </template>
+                      <template v-if="column?.dataIndex == 'defineOrgIdWrapper'">
+                        <span v-if="record.dataScopeType == 41">{{ record.defineOrgIdWrapper }}</span>
+                        <span v-if="record.dataScopeType == 40">{{ getDefineOrgList(record) }}</span>
+                        <span v-if="record.dataScopeType == 32" :style="{ color: record?.organizationLevel?.levelColor }">{{
+                          getLevelName(record)
+                        }}</span>
+                      </template>
+                    </template>
+                  </common-table>
                 </div>
                 <!-- 权限范围 -->
                 <div v-if="rightActiveKey == 'range' && powerRangeData" class="use-content">
@@ -195,20 +245,26 @@
                           :pagination="false"
                           rowKey="nodeId"
                           bordered
+                          v-model:expandedRowKeys="expandedRowKeys"
+                          :checkStrictly="true"
                           size="small"
-                          childrenColumnName="other"
                         >
                           <template #bodyCell="{ column, record }">
                             <template v-if="column.dataIndex === 'page'">
-                              <a-checkbox v-model:checked="record.checked" @change="pageChange($event, record, perItem)">
+                              <a-checkbox
+                                v-model:checked="record.checked"
+                                v-if="record.leafFlag"
+                                @change="pageChange($event, record, perItem)"
+                              >
                                 {{ record.nodeName }}
                               </a-checkbox>
+                              <span v-else>{{ record.nodeName }}</span>
                             </template>
-                            <template v-else-if="column.dataIndex === 'use'">
+                            <template v-else-if="column.dataIndex === 'use' && record.functionList">
                               <a-checkbox
                                 v-model:checked="chlItem.checked"
-                                @change="useChange($event, chlItem, record, perItem)"
-                                v-for="chlItem in record.children"
+                                @change="useChange($event, chlItem, perItem)"
+                                v-for="chlItem in record.functionList"
                                 :key="chlItem.nodeId"
                               >
                                 {{ chlItem.nodeName }}
@@ -230,17 +286,6 @@
 
     <!-- 选择组件 -->
     <Selection
-      v-model:visible="showSelect"
-      v-if="showSelect"
-      title="选择部门"
-      :data="selectData"
-      :isRadio="false"
-      :showTab="['dept']"
-      @done="closeSelect"
-    />
-
-    <!-- 选择组件 -->
-    <Selection
       v-model:visible="showSelectCompany"
       v-if="showSelectCompany"
       title="选择公司"
@@ -248,18 +293,31 @@
       :showTab="['company']"
       @done="closeSelectCompany"
     />
+
+    <!-- 新增编辑数据权限 -->
+    <DataScopeAddEdit
+      v-model:visible="showAddEditData"
+      v-if="showAddEditData"
+      :data="current"
+      :levelNumberList="levelNumberList"
+      @done="getRoleBindDataScope"
+      :roleId="activeKey"
+    />
   </div>
 </template>
 
 <script setup name="Premission">
-import { message } from 'ant-design-vue/es';
-import { ref, onMounted, reactive, computed } from 'vue';
+import { message, Modal } from 'ant-design-vue/es';
+import { ref, onMounted, computed, nextTick, createVNode, defineAsyncComponent } from 'vue';
 import { PermissionApi } from './api/PermissionApi';
 import { useUserStore } from '@/store/modules/user';
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
+
+const DataScopeAddEdit = defineAsyncComponent(() => import('./components/data-scope-add-edit.vue'));
 
 defineOptions({
-  name: 'Premission',
-})
+  name: 'Premission'
+});
 
 // 角色列表
 const roleList = ref([]);
@@ -287,6 +345,10 @@ const showSelectRole = ref(false);
 const selectSystemRoleId = ref(20);
 // 是否显示选择公司
 const showSelectCompany = ref(false);
+// 当前选中数据
+const currentSelectKeys = ref([]);
+// 展开数据
+const expandedKeys = ref([]);
 // 当前激活tab
 const activeKey = ref('');
 // 右侧tab默认
@@ -295,24 +357,17 @@ const rightActiveKey = ref('use');
 const authLoading = ref(false);
 // 功能列表数据
 const permissionData = ref(null);
-// 是否显示选择部门
-const showSelect = ref(false);
-// 表单数据
-const form = ref({
-  orgIdListWaper: []
-});
+// 展开行
+const expandedRowKeys = ref([]);
 // 选择的总数据
 const selectData = ref({
-  selectOrgList: [],
   selectCompanyList: []
 });
-// 验证规则
-const rules = reactive({});
 // 表格配置
 const columns = ref([
   {
     title: '页面',
-    width: 200,
+    width: 300,
     dataIndex: 'page'
   },
   {
@@ -328,6 +383,89 @@ const userStore = useUserStore();
 
 // 系统名称
 const systemName = ref('');
+
+// 数据权限表格配置
+const dataColumns = ref([
+  {
+    title: '序号',
+    width: 40,
+    key: 'index',
+    align: 'center'
+  },
+  {
+    title: '类型',
+    width: 100,
+    dataIndex: 'dataScopeTypeWrapper'
+  },
+  {
+    title: '范围',
+    width: 100,
+    dataIndex: 'defineOrgIdWrapper'
+  },
+  {
+    title: '创建人',
+    width: 100,
+    dataIndex: 'createUserWrapper'
+  },
+  {
+    title: '创建时间',
+    width: 100,
+    dataIndex: 'createTime'
+  }
+]);
+
+const where = ref({
+  roleId: ''
+});
+
+const tableRef = ref(null);
+// 是否显示新增编辑数据权限
+const showAddEditData = ref(false);
+
+const current = ref(null);
+
+const levelNumberList = ref([
+  {
+    value: 1,
+    name: '一级'
+  },
+  {
+    value: 2,
+    name: '二级'
+  },
+  {
+    value: 3,
+    name: '三级'
+  },
+  {
+    value: 4,
+    name: '四级'
+  },
+  {
+    value: 5,
+    name: '五级'
+  },
+  {
+    value: 6,
+    name: '六级'
+  },
+  {
+    value: 7,
+    name: '七级'
+  },
+  {
+    value: 8,
+    name: '八级'
+  },
+  {
+    value: 9,
+    name: '九级'
+  },
+  {
+    value: 10,
+    name: '十级'
+  }
+]);
 
 //是否显示
 const isShow = computed(() => value => {
@@ -350,6 +488,27 @@ const currentCompanyData = computed(() => {
     return filter[0];
   }
 });
+// 获取范围名称
+const getDefineOrgList = computed(() => {
+  return record => {
+    let name = '';
+    if (record?.defineOrgListWrapper) {
+      name = record.defineOrgListWrapper.join(',');
+    }
+    return name;
+  };
+});
+// 获取层级名称
+const getLevelName = computed(() => {
+  return record => {
+    let name = '';
+    if (record?.organizationLevel) {
+      let levelData = levelNumberList.value.find(item => item.value == record.organizationLevel.levelNumber);
+      name = `${record.organizationLevel.levelName}(${levelData.name})`;
+    }
+    return name;
+  };
+});
 
 // 公司信息
 const companyData = ref({});
@@ -368,10 +527,24 @@ const getAllRoleList = () => {
   if (selectSystemRoleId.value == 20) {
     params.roleCompanyId = companyData.value?.companyId;
   }
-  PermissionApi.getRoleList(params).then(res => {
-    roleList.value = res;
-    if (res && res.length) {
-      activeKey.value = res[0].roleId;
+  let result;
+  if (selectSystemRoleId.value == 15) {
+    result = PermissionApi.getRoleCategoryAndRoleTree();
+  } else {
+    result = PermissionApi.getRoleList(params);
+  }
+  result.then(res => {
+    let firstChild = null;
+    if (selectSystemRoleId.value == 15) {
+      roleList.value = setTreeData(res);
+      firstChild = findNodeType2(res);
+    } else {
+      roleList.value = res;
+      firstChild = res?.length > 0 ? res[0] : null;
+    }
+    if (firstChild) {
+      activeKey.value = firstChild.roleId;
+      currentSelectKeys.value = [firstChild.roleId];
       if (userStore.authorities.find(item => item === 'CHANGE_ROLE_PERMISSION')) {
         rightActiveKey.value = 'use';
         rightChange('use');
@@ -384,11 +557,44 @@ const getAllRoleList = () => {
       }
     } else {
       activeKey.value = '';
+      currentSelectKeys.value = [];
       permissionData.value = [];
       powerRangeData.value = [];
-      form.value.orgIdListWaper = [];
     }
   });
+};
+
+// 设置数据
+const setTreeData = arr => {
+  if (arr?.length > 0) {
+    arr.forEach(item => {
+      item.roleName = item.roleTreeNodeName;
+      item.roleId = item.roleTreeNodeId;
+      if (item.nodeType == 1) {
+        item.disabled = true;
+      }
+      if (item.children?.length > 0) {
+        item.children = setTreeData(item.children);
+      }
+    });
+  }
+  return arr;
+};
+
+// 查找第一个业务角色
+const findNodeType2 = nodes => {
+  for (const node of nodes) {
+    if (node.nodeType === 2) {
+      return node;
+    }
+    if (node.children && node.children.length > 0) {
+      const result = findNodeType2(node.children);
+      if (result) {
+        return result;
+      }
+    }
+  }
+  return null;
 };
 
 // 切换系统角色
@@ -427,36 +633,65 @@ const closeSelectCompany = data => {
 
 // 获取角色绑定的权限列表
 const getRoleBindPermission = () => {
+  expandedRowKeys.value = [];
   authLoading.value = true;
   PermissionApi.getRoleBindPermission({ roleId: activeKey.value })
     .then(res => {
-      permissionData.value = res;
-    })
-    .finally(() => (authLoading.value = false));
-};
-
-// 获取角色的数据权限详情
-const getRoleBindDataScope = () => {
-  authLoading.value = true;
-  PermissionApi.getRoleBindDataScope({ roleId: activeKey.value })
-    .then(res => {
-      form.value = Object.assign({}, res);
-      if (res.orgIdListWrapper) {
-        form.value.orgIdListWaper = res.orgIdListWrapper.map(item => {
-          return { bizId: item.orgId, name: item.orgName };
-        });
-      } else {
-        form.value.orgIdListWaper = [];
+      if (res) {
+        setData(res.appPermissionList);
+        permissionData.value = res;
       }
     })
     .finally(() => (authLoading.value = false));
 };
 
+const setData = arr => {
+  if (arr?.length > 0) {
+    arr.forEach(item => {
+      if (item?.children?.length > 0) {
+        expandedRowKeys.value.push(item.nodeId);
+        setData(item.children);
+      }
+    });
+  }
+};
+
+// 获取角色的数据权限详情
+const getRoleBindDataScope = () => {
+  where.value.roleId = activeKey.value;
+  nextTick(() => {
+    tableRef.value.reload();
+  });
+};
+
+// 添加数据权限
+const addEditDataPower = data => {
+  current.value = data;
+  showAddEditData.value = true;
+};
+
+// 删除数据权限
+const removeDataPower = data => {
+  Modal.confirm({
+    title: '提示',
+    content: '确定要删除选中的数据权限吗?',
+    icon: createVNode(ExclamationCircleOutlined),
+    maskClosable: true,
+    onOk: async () => {
+      const res = await PermissionApi.roleDataScopeDelete({ roleDataScopeId: data.roleDataScopeId });
+      message.success(res.message);
+      getRoleBindDataScope();
+    }
+  });
+};
+
 // 获取角色的权限范围详情列表
 const getRoleLimit = () => {
+  expandedRowKeys.value = [];
   authLoading.value = true;
   PermissionApi.getRoleLimit({ roleId: activeKey.value })
     .then(res => {
+      setData(res.appPermissionList);
       powerRangeData.value = res;
     })
     .finally(() => (authLoading.value = false));
@@ -474,9 +709,9 @@ const rightChange = key => {
 };
 
 // 左侧角色切换
-const leftChange = roleItem => {
-  if (roleItem.roleId != activeKey.value) {
-    activeKey.value = roleItem.roleId;
+const leftChange = (selectedKeys, { node }) => {
+  if (node.roleId != activeKey.value) {
+    activeKey.value = node.roleId;
     rightActiveKey.value = 'use';
     getRoleBindPermission();
   }
@@ -495,17 +730,17 @@ const allPermissionChange = (el, data) => {
  * @param {*} flag 是否改变子级的选中状态
  * @param {*} isPermissionData 是否改变所有数据的选中状态
  * @param {*} perItem 是否改变全选的状态
- * @param {*} record 是否改变页面的状态
  */
-const setAndSaveValue = (el, data, setName, flag, isPermissionData, perItem, record) => {
+const setAndSaveValue = (el, data, setName, flag, isPermissionData, perItem) => {
   data.checked = el.target.checked;
+  const recordSelectList = flattenTree([perItem]);
   if (flag) {
-    setCheckout(el.target.checked, data[setName]);
+    setCheckout(el.target.checked, setName ? data[setName] : [data]);
   }
 
   //全选
   if (perItem) {
-    if (perItem.children.find(item => item.checked == false) || (record && record.children.find(item => item.checked == false))) {
+    if (recordSelectList.find(item => item.checked == false)) {
       perItem.checked = false;
     } else {
       perItem.checked = true;
@@ -532,19 +767,36 @@ const setAndSaveValue = (el, data, setName, flag, isPermissionData, perItem, rec
   savePermission(data);
 };
 
+const flattenTree = tree => {
+  const result = [];
+  function traverse(node) {
+    if (node?.leafFlag) {
+      result.push(node);
+      if (node?.functionList && Array.isArray(node.functionList)) {
+        result.push(...node.functionList);
+      }
+    }
+    if (node?.children && Array.isArray(node.children)) {
+      node.children.forEach(traverse);
+    }
+  }
+  tree.forEach(traverse);
+  return result;
+};
+
 // 全选改变
 const perItemChange = (el, data) => {
-  setAndSaveValue(el, data, 'children', true, true);
+  setAndSaveValue(el, data, '', true, true);
 };
 
 // 页面选中改变
 const pageChange = (el, data, perItem) => {
-  setAndSaveValue(el, data, 'children', true, true, perItem);
+  setAndSaveValue(el, data, '', true, true, perItem);
 };
 
 // 功能改变
-const useChange = (el, data, record, perItem) => {
-  setAndSaveValue(el, data, '', false, true, perItem, record);
+const useChange = (el, data, perItem) => {
+  setAndSaveValue(el, data, '', false, true, perItem);
 };
 
 // 保存功能权限
@@ -574,50 +826,22 @@ const setCheckout = (checked, list) => {
   if (list && list.length > 0) {
     list.forEach(item => {
       item.checked = checked;
+      if (item.functionList && item.functionList.length > 0) {
+        setCheckout(checked, item.functionList);
+      }
       if (item.children && item.children.length > 0) {
         setCheckout(checked, item.children);
       }
     });
   }
 };
-
-// 删除部门
-const logClose = index => {
-  form.value.orgIdListWaper.splice(index, 1);
-};
-
-// 关闭选择部门弹框
-const closeSelect = val => {
-  form.value.orgIdListWaper = val.selectOrgList;
-};
-// 添加部门
-const addClick = () => {
-  selectData.value.selectOrgList = form.value.orgIdListWaper;
-  showSelect.value = true;
-};
-
-const saveClick = () => {
-  authLoading.value = true;
-  PermissionApi.updateRoleBindDataScope({
-    roleId: activeKey.value,
-    dataScopeType: form.value.dataScopeType,
-    orgIdList: form.value.orgIdListWaper.map(item => item.bizId)
-  })
-    .then(res => {
-      message.success(res.message);
-    })
-    .finally(() => (authLoading.value = false));
-};
-
-// 类型改变
-const dataScopeTypeChange = ({ target }) => {
-  if (target.value != 40) {
-    form.value.orgIdListWaper = [];
-  }
-};
 </script>
 
 <style scoped lang="less">
+@import url('@/styles/commonTree.less');
+:deep(.ant-tree .ant-tree-treenode-disabled .ant-tree-node-content-wrapper) {
+  color: #000 !important;
+}
 .left-tab {
   height: 100%;
 }
@@ -665,25 +889,11 @@ const dataScopeTypeChange = ({ target }) => {
     }
   }
   .permission-left-body {
-    padding-top: 10px;
+    padding: 10px 10px 0 0;
     flex: auto;
     width: 100%;
     overflow-y: auto;
     border-right: 1px solid #eee;
-    .permission-left-body-item {
-      text-align: center;
-      cursor: pointer;
-      height: 38px;
-      line-height: 38px;
-      &:hover {
-        color: var(--primary-color);
-      }
-    }
-    .role-select {
-      background: rgba(24, 144, 255, 0.1);
-      color: var(--primary-5);
-      border-right: 2px solid var(--primary-color);
-    }
   }
 }
 .permission-right {
@@ -833,11 +1043,17 @@ const dataScopeTypeChange = ({ target }) => {
     }
   }
 }
-:deep(.ant-table-thead th) {
-  text-align: center;
+.use-content {
+  :deep(.ant-table-thead th) {
+    text-align: center;
+  }
+  :deep(.ant-table-tbody .ant-table-cell) {
+    padding: 8px 8px 8px 20px !important;
+  }
 }
-:deep(.ant-table-tbody .ant-table-cell) {
-  padding: 8px 8px 8px 20px !important;
+.data-power {
+  width: 100%;
+  height: 100%;
 }
 .select {
   margin-top: 8px;
@@ -853,6 +1069,43 @@ const dataScopeTypeChange = ({ target }) => {
   box-shadow: 0 0 0 0px var(--primary-color-outline);
 }
 
+.td-item {
+  flex: auto;
+  display: flex;
+  align-items: center;
+
+  .td-label {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .title-img {
+    width: 18px;
+    height: 18px;
+    margin-bottom: 3px;
+    margin-right: 8px;
+  }
+
+  .td-btn {
+    position: absolute;
+    display: none;
+  }
+}
+:deep(.td-item:hover) {
+  .td-label {
+    width: calc(100% - 100px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .td-btn {
+    right: 0;
+    display: inline-block;
+  }
+}
+
 @media screen and (max-width: 768px) {
   .permission {
     flex-direction: column;
@@ -860,10 +1113,11 @@ const dataScopeTypeChange = ({ target }) => {
   .permission-left {
     margin-bottom: 10px;
   }
-  .permission-left, .permission-right {
+  .permission-left,
+  .permission-right {
     width: 100%;
   }
-  .ant-checkbox-wrapper + .ant-checkbox-wrapper{
+  .ant-checkbox-wrapper + .ant-checkbox-wrapper {
     margin-left: 0px;
   }
 }

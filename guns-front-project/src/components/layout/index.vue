@@ -12,9 +12,10 @@
       :project-name="projectName"
       :show-refresh="showRefresh"
       :show-left-tool="showHeadLeftTool"
+      :is-mix-side-menu="isMixSideMenu"
       :breadcrumb-separator="breadcrumbSeparator"
       :show-collapse="showCollapse && showSideMenu"
-      :show-breadcrumb="showBreadcrumb && layoutStyle === 'top'"
+      :show-breadcrumb="showBreadcrumb && layoutStyle === 'side'"
       @toggle-collapse="updateCollapse"
       @reload-page="reloadPage"
       @logo-click="onLogoClick"
@@ -25,9 +26,26 @@
       </template>
     </LayoutHeader>
     <div class="guns-admin-main">
+      <!-- 双侧栏一级 -->
+      <LayoutSidebarNav
+        v-if="showSideNav"
+        :data="sideNavData"
+        :theme="sideNavTheme"
+        :collapse="sideNavCollapse"
+        :menu-collapse="collapse"
+        :inline-indent="inlineIndent"
+        :show-nav-collapse="showNavCollapse"
+        :active="collapse ? sideMenuActive : sideNavActive"
+        @toggle-collapse="updateSideNavCollapse"
+        @title-click="onSideNavTitleClick"
+      >
+        <template v-for="name in Object.keys($slots)" #[name]="props">
+          <slot :name="name" v-bind="props || {}"></slot>
+        </template>
+      </LayoutSidebarNav>
       <!-- 侧栏 -->
       <LayoutSidebar
-        v-if="sideMenuData && sideMenuData.length"
+        v-if="showSideMenu"
         :data="sideMenuData"
         :theme="sideMenuTheme"
         :active="sideMenuActive"
@@ -110,6 +128,7 @@ import {
 import { LAYOUT_KEY } from './util';
 import LayoutHeader from './components/layout-header.vue';
 import LayoutSidebar from './components/layout-sidebar.vue';
+import LayoutSidebarNav from './components/layout-sidebar-nav.vue';
 import LayoutTabs from './components/layout-tabs.vue';
 import props from './props';
 
@@ -167,6 +186,9 @@ export default defineComponent({
     // 侧栏一级菜单数据
     const sideNavData = ref([]);
 
+    // 侧栏一级菜单选中
+    const sideNavActive = ref([]);
+
     // 侧栏菜单数据
     const sideMenuData = ref([]);
 
@@ -202,14 +224,29 @@ export default defineComponent({
     // 是否是混合菜单布局
     const isMixMenu = computed(() => props.layoutStyle === 'mix');
 
+    // 是否是侧栏双菜单
+    const isMixSideMenu = computed(() => props.sideMenuStyle === 'mix');
+
+    // 是否显示侧栏一级菜单
+    const showSideNav = computed(() => {
+      return !(
+        !isMixSideMenu.value ||
+        isMobile.value ||
+        isTopMenu.value ||
+        (sideNavData.value.length === 0 && menuData.value.length !== 0) ||
+        hideSidebar.value
+      );
+    });
+
     // 是否显示侧栏菜单
     const showSideMenu = computed(() => {
-      return isMobile.value || !isTopMenu.value;
+      const haveSideMenu = sideMenuData.value.filter(d => !d.meta?.hide).length === 0;
+      return isMobile.value || !(isTopMenu.value || (haveSideMenu && menuData.value.length !== 0) || hideSidebar.value);
     });
 
     // 是否显示侧栏区域
     const showSidebar = computed(() => {
-      return showSideMenu.value;
+      return showSideNav.value || showSideMenu.value;
     });
 
     // 布局 class
@@ -224,6 +261,10 @@ export default defineComponent({
         { 'guns-admin-head-dark': props.headStyle !== 'light' },
         // 暗色侧栏
         { 'guns-admin-side-dark': props.sideStyle === 'dark' },
+        // 侧栏双排菜单
+        {
+          'guns-admin-side-mix': isMixSideMenu.value && showSideNav.value
+        },
         // logo 宽度自适应
         {
           'guns-admin-logo-auto': (props.logoAutoSize || !showSidebar.value) && !isMobile.value
@@ -242,6 +283,10 @@ export default defineComponent({
         {
           'guns-admin-content-fullscreen': props.bodyFullscreen && props.contentFullscreen
         },
+        // 侧栏双排菜单布局时折叠一级菜单
+        {
+          'guns-admin-nav-collapse': props.sideNavCollapse && showSideNav.value
+        },
         // 开启响应式
         { 'guns-admin-responsive': props.styleResponsive }
       ];
@@ -249,7 +294,7 @@ export default defineComponent({
 
     // 是否折叠侧栏菜单
     const sideMenuCollapse = computed(() => {
-      return isMobile.value ? false : props.collapse;
+      return isMobile.value || isMixSideMenu.value ? false : props.collapse;
     });
 
     // 双侧栏一级菜单主题
@@ -259,7 +304,7 @@ export default defineComponent({
 
     // 侧栏菜单主题
     const sideMenuTheme = computed(() => {
-      return false && !isMobile.value ? 'light' : sideNavTheme.value;
+      return isMixSideMenu.value && !isMobile.value ? 'light' : sideNavTheme.value;
     });
 
     // 是否显示顶栏左侧功能区
@@ -444,11 +489,11 @@ export default defineComponent({
 
       // 更新顶栏和侧栏的菜单选中
       updateMenuActive(active, matched);
-
       // 混合导航更新菜单数据
-      if (isMixMenu.value) {
-        splitMenuData();
-      }
+      // if (isMixMenu.value) {
+      //   splitMenuData();
+      // }
+      splitMenuData();
 
       // 移动设备自动收起侧栏
       if (props.styleResponsive && isMobile.value) {
@@ -473,16 +518,19 @@ export default defineComponent({
         const match2 = matched.length > 1 ? matched[1] : match1; // 第二层级导航选中
         return { active1: match1.path, active2: match2.path };
       })();
-      if (isMixMenu.value) {
+      if (isTopMenu.value) {
+        // 顶栏导航
+        headMenuActive.value = [active].concat(openKeys);
+        sideNavActive.value = [];
+      } else if (isMixMenu.value) {
         // 混合导航
         sideMenuActive.value = active1 ? [active1] : [];
+        headMenuActive.value = [active].concat(openKeys);
+        sideNavActive.value = [];
       } else {
         // 左侧导航
-        sideMenuActive.value = [];
-      }
-      if (isMixMenu.value) {
-        headMenuActive.value = [active].concat(openKeys);
-      } else {
+        headMenuActive.value = [];
+        sideNavActive.value = active1 ? [active1] : [];
         sideMenuActive.value = [active].concat(openKeys);
       }
 
@@ -507,6 +555,11 @@ export default defineComponent({
         headMenuData.value = [];
         sideNavData.value = [];
         sideMenuData.value = menuData.value;
+      } else if (isTopMenu.value) {
+        // 顶部导航
+        headMenuData.value = menuData.value;
+        sideNavData.value = [];
+        sideMenuData.value = [];
       } else if (isMixMenu.value) {
         // 混合导航
         sideMenuData.value = menuData.value.map(d => {
@@ -523,6 +576,23 @@ export default defineComponent({
         if (!sideMenus.length) {
           sideNavData.value = [];
           headMenuData.value = [];
+        } else if (isMixSideMenu.value) {
+          // 左侧双菜单
+          sideNavData.value = sideMenus.map(d => {
+            return {
+              path: d.path,
+              component: d.component,
+              meta: d.meta,
+              children: props.collapse ? d.children : void 0,
+              tempChildren: d.children
+            };
+          });
+          const temps = sideNavActive.value.length
+            ? sideMenus.filter(d => {
+                return sideNavActive.value[0] === d.path;
+              })
+            : [];
+          sideMenuData.value = (temps.length ? temps[0].children : sideMenus[0].children) || [];
         } else {
           // 左侧单菜单
           sideNavData.value = [];
@@ -531,9 +601,28 @@ export default defineComponent({
       } else {
         // 左侧导航
         headMenuData.value = [];
-        // 左侧单菜单
-        sideNavData.value = [];
-        sideMenuData.value = menuData.value;
+        if (isMixSideMenu.value) {
+          // 左侧双菜单
+          sideNavData.value = menuData.value.map(d => {
+            return {
+              path: d.path,
+              component: d.component,
+              meta: d.meta,
+              children: props.collapse ? d.children : void 0,
+              tempChildren: d.children
+            };
+          });
+          const temps = sideNavActive.value.length
+            ? menuData.value.filter(d => {
+                return sideNavActive.value[0] === d.path;
+              })
+            : [];
+          sideMenuData.value = (temps.length ? temps[0].children : menuData.value[0].children) || [];
+        } else {
+          // 左侧单菜单
+          sideNavData.value = [];
+          sideMenuData.value = menuData.value;
+        }
       }
     };
 
@@ -553,7 +642,8 @@ export default defineComponent({
           }
         };
       });
-      splitMenuData();
+      
+      // splitMenuData();
       homeRouteTitle.value = props.homeTitle ?? tempTitle ?? '';
     };
 
@@ -651,6 +741,23 @@ export default defineComponent({
     });
 
     watch(
+      () => props.collapse,
+      () => {
+        if (isMixSideMenu.value) {
+          if (props.collapse) {
+            sideNavData.value = sideNavData.value.map(d => {
+              return { ...d, children: d.tempChildren };
+            });
+          } else {
+            sideNavData.value = sideNavData.value.map(d => {
+              return { ...d, children: void 0 };
+            });
+          }
+        }
+      }
+    );
+
+    watch(
       () => props.locale,
       () => {
         updateMenuData();
@@ -720,7 +827,7 @@ export default defineComponent({
         collapse: props.collapse,
         sideNavCollapse: props.sideNavCollapse,
         isTopMenu: isTopMenu.value,
-        isMixSideMenu: false,
+        isMixSideMenu: isMixSideMenu.value,
         bodyFullscreen: props.bodyFullscreen,
         contentFullscreen: props.contentFullscreen,
         showTabs: props.showTabs,
@@ -736,6 +843,7 @@ export default defineComponent({
       isInit,
       levelData,
       sideNavData,
+      sideNavActive,
       sideMenuData,
       sideMenuActive,
       sideMenuOpen,
@@ -752,6 +860,8 @@ export default defineComponent({
       showHeadLeftTool,
       showTabRefresh,
       contentRef,
+      showSideNav,
+      isMixSideMenu,
       updateCollapse,
       updateSideNavCollapse,
       updateBodyFullscreen,

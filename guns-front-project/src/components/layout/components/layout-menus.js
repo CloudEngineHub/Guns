@@ -46,9 +46,11 @@ export default defineComponent({
     showIcon: {
       type: Boolean,
       default: true
-    }
+    },
+    // 是否是侧栏双菜单
+    isMixSideMenu: Boolean
   },
-  emits: ['openChange', 'titleClick'],
+  emits: ['openChange', 'titleClick', 'appChange'],
   setup(props, { emit, slots }) {
     /* 递归渲染菜单节点 */
     const renderItems = (data, popupClassName) => {
@@ -76,6 +78,8 @@ export default defineComponent({
             linkNode = h('a', { href: item.path, target: '_blank' });
           } else if (isExternalLink(item.redirect)) {
             linkNode = h('a', { href: item.redirect, target: '_blank' });
+          } else if (props.isMixSideMenu) {
+            linkNode = h('a');
           } else {
             linkNode = h(RouterLink, { to: item.redirect ? item.redirect : item.path });
           }
@@ -125,6 +129,11 @@ export default defineComponent({
       return nodes;
     };
 
+    const menuSelect = e => {
+      emit('appChange', e);
+      return;
+    };
+
     return () => {
       return h(
         AMenu,
@@ -137,7 +146,8 @@ export default defineComponent({
           inlineIndent: props.inlineIndent,
           titleSlot: props.titleSlot,
           iconSlot: props.iconSlot,
-          onOpenChange: keys => emit('openChange', keys)
+          onOpenChange: keys => emit('openChange', keys),
+          onClick: e => menuSelect(e)
         },
         () => renderItems(props.data, props.firstPopClass)
       );

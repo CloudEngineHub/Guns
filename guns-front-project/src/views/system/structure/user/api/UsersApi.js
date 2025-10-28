@@ -15,6 +15,15 @@ export class UsersApi {
   }
 
   /**
+   * 获取最新重置密码
+   * @param {*} params
+   * @returns
+   */
+  static getResetPassword(params) {
+    return Request.getAndLoadData('/sysUser/getResetPassword', params);
+  }
+
+  /**
    * 添加
    * @param {*} params
    * @returns
@@ -132,5 +141,41 @@ export class UsersApi {
    */
   static ensureImport(params) {
     return Request.post('/userImport/ensureImport', params);
+  }
+
+  /**
+   * 获取左侧机构列表
+   * @param {*} params
+   * @returns
+   */
+  static getUserOrgList(params) {
+    return Request.getAndLoadData('/sysRoleAssign/v2/getUserOrgList', params);
+  }
+
+  /**
+   * 获取用户指定机构下的业务角色树
+   * @param {*} params
+   * @returns
+   */
+  static getCompanyBusinessRoleTree(params) {
+    return Request.get('/sysRoleAssign/v2/getCompanyBusinessRoleTree', params);
+  }
+
+  /**
+   * 获取用户指定机构下的公司角色树
+   * @param {*} params
+   * @returns
+   */
+  static getCompanyRoleTree(params) {
+    return Request.get('/sysRoleAssign/v2/getCompanyRoleTree', params);
+  }
+
+  /**
+   * 绑定或取消绑定角色
+   * @param {*} params
+   * @returns
+   */
+  static changeRoleSelect(params) {
+    return Request.post('/sysRoleAssign/changeRoleSelect', params);
   }
 }

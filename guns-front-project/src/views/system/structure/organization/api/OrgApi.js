@@ -98,4 +98,20 @@ export class OrgApi {
   static ensureImport(params) {
     return Request.post('/orgImport/ensureImport', params);
   }
+  /**
+   * 获取机构层级列表
+   * @param {*} params
+   * @returns
+   */
+  static organizationLevelList(params) {
+    return Request.getAndLoadData('/organizationLevel/list', params);
+  }
+  /**
+   * 添加组织机构层级
+   * @param {*} params
+   * @returns
+   */
+  static updateTotal(params) {
+    return Request.post('/organizationLevel/updateTotal', params);
+  }
 }

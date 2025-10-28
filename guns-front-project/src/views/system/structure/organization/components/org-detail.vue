@@ -29,6 +29,7 @@
               <a-form-item :label="item.name">
                 <span v-if="item.value == 'orgType'">{{ form[item.value] == 1 ? '公司' : '部门' }}</span>
                 <span v-else-if="item.value == 'statusFlag'">{{ form[item.value] == 1 ? '启用' : '禁用' }}</span>
+                <span v-else-if="item.value == 'levelCode'">{{ getLevelName }}</span>
                 <span v-else>{{ form[item.value] }}</span>
               </a-form-item>
             </a-col>
@@ -43,12 +44,12 @@
     </div>
 
     <!-- 新增编辑弹框 -->
-    <OrgAddEdit v-model:visible="showEdit" v-if="showEdit" :data="form" @done="getDetail" />
+    <OrgAddEdit v-model:visible="showEdit" v-if="showEdit" :data="form" @done="getDetail" :levelNumberList="props.levelNumberList" />
   </common-drawer>
 </template>
 
 <script setup name="OrgDetail">
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, onMounted, watch, nextTick, computed } from 'vue';
 import { OrgApi } from '../api/OrgApi';
 import OrgAddEdit from './org-add-edit.vue';
 import SetApprover from './set-approver.vue';
@@ -57,7 +58,8 @@ const props = defineProps({
   visible: Boolean,
   data: Object,
   //是否默认选中审批人
-  isShowApprover: Boolean
+  isShowApprover: Boolean,
+  levelNumberList: Array
 });
 
 const emits = defineEmits(['update:visible', 'done']);
@@ -102,10 +104,6 @@ const baseColumn = ref([
     value: 'orgType'
   },
   {
-    name: '排序',
-    value: 'orgSort'
-  },
-  {
     name: '机构简称',
     value: 'orgShortName'
   },
@@ -114,19 +112,43 @@ const baseColumn = ref([
     value: 'statusFlag'
   },
   {
+    name: '机构层级',
+    value: 'levelCode'
+  },
+  {
     name: '税号',
     value: 'taxNo'
   },
   {
     name: '备注',
     value: 'remark'
+  },
+  {
+    name: '排序',
+    value: 'orgSort'
   }
 ]);
+
+const levelList = ref([]);
+
+const getLevelName = computed(() => {
+  let name = '';
+  if (form.value?.levelCode) {
+    let levelData = levelList.value.find(item => item.levelCode == form.value.levelCode);
+    if (levelData) {
+      name = levelData.levelName;
+      let numberData = props.levelNumberList.find(item => item.value == levelData.levelNumber);
+      if (numberData) name += '(' + numberData.name + ')';
+    }
+  }
+  return name;
+});
 
 onMounted(() => {
   if (props.isShowApprover) {
     activeKey.value = '2';
   }
+  getLevelList();
   getDetail();
 });
 
@@ -149,6 +171,11 @@ const getDetail = () => {
   nextTick(() => {
     setApproverRef.value.getListData();
   });
+};
+
+// 获取机构层级
+const getLevelList = async () => {
+  levelList.value = await OrgApi.organizationLevelList();
 };
 
 // 更改弹框状态

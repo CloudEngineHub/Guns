@@ -7,19 +7,7 @@
             <div class="content-mian-header">
               <div class="header-content">
                 <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-input
-                      v-model:value="where.searchText"
-                      placeholder="应用名称、编码（回车搜索）"
-                      @pressEnter="reload"
-                      class="search-input"
-                    >
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
-                  </a-space>
+                  <a-space :size="16"> </a-space>
                 </div>
                 <div class="header-content-right">
                   <a-space :size="16">
@@ -29,12 +17,8 @@
                     <a-dropdown>
                       <template #overlay>
                         <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
                           <div v-permission="['DELETE_APP']">
-                            <a-menu-item key="2">
+                            <a-menu-item key="1">
                               <icon-font iconClass="icon-opt-shanchu" color="#60666b"></icon-font>
                               <span>批量删除</span>
                             </a-menu-item>
@@ -52,7 +36,30 @@
             </div>
             <div class="content-mian-body">
               <div class="table-content">
-                <common-table :columns="columns" :where="where" rowId="appId" ref="tableRef" url="/sysApp/page">
+                <common-table
+                  :columns="columns"
+                  :where="where"
+                  :showToolTotal="false"
+                  showTableTool
+                  rowId="appId"
+                  ref="tableRef"
+                  url="/sysApp/page"
+                  fieldBusinessCode="APP_TABLE"
+                >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.searchText"
+                      placeholder="应用名称、编码（回车搜索）"
+                      @pressEnter="reload"
+                      :bordered="false"
+                      style="width: 240px"
+                      class="search-input"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <!-- 姓名 -->
                     <template v-if="column.dataIndex == 'appName'">
@@ -102,15 +109,6 @@
       </div>
     </div>
 
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
-
     <!-- 新增编辑弹框 -->
     <AppAddEdit v-model:visible="showEdit" v-if="showEdit" :data="current" @done="reload" />
   </div>
@@ -123,11 +121,10 @@ import { message, Modal } from 'ant-design-vue/es';
 import AppAddEdit from './components/app-add-edit.vue';
 import { useUserStore } from '@/store/modules/user';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 
 defineOptions({
-  name: 'AuthRole',
-})
+  name: 'AuthRole'
+});
 
 // 表格配置
 const columns = ref([
@@ -190,14 +187,10 @@ const tableRef = ref(null);
 const where = ref({
   searchText: ''
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
 // 当前行数据
 const current = ref(null);
 // 是否显示新增编辑弹框
 const showEdit = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('APP_TABLE');
 
 const userStore = useUserStore();
 
@@ -209,24 +202,11 @@ const disabled = computed(() => {
   return true;
 });
 
-onMounted(() => {
-  getColumnData();
-});
-
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
+onMounted(() => {});
 
 // 更多点击
 const moreClick = ({ key }) => {
   if (key == '1') {
-    isShowCustom.value = true;
-  } else if (key == '2') {
     batchDelete();
   }
 };
@@ -234,12 +214,6 @@ const moreClick = ({ key }) => {
 // 点击搜索
 const reload = () => {
   tableRef.value.reload();
-};
-
-// 清除搜索条件
-const clear = () => {
-  where.value.searchText = '';
-  reload();
 };
 
 // 新增编辑点击

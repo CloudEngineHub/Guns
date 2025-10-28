@@ -87,6 +87,7 @@
       :ssoClientId="ssoClientId"
       :ssoCallback="ssoCallback"
       :goHome="goHome"
+      @done="closeVertify"
     />
   </div>
 </template>
@@ -260,9 +261,10 @@ const submit = () => {
       .then(response => {
         SsoUtil.activateByLoginCode(ssoClientId ?? SSO_CLIENT_ID, ssoCallback ?? '', response?.data);
       })
-      .finally(() => {
+      .catch(e => {
         loading.value = false;
-      });
+      })
+      .finally(() => {});
   }
 
   // 没开启单点登录，正常走登录接口逻辑
@@ -275,9 +277,10 @@ const submit = () => {
         cleanPageTabs();
         goHome();
       })
-      .finally(() => {
+      .catch(e => {
         loading.value = false;
-      });
+      })
+      .finally(() => {});
   }
 };
 
@@ -295,6 +298,10 @@ const changeCaptcha = () => {
       message.error(e.message);
     });
 };
+
+const closeVertify = () => {
+  loading.value = true;
+}
 
 if (getToken()) {
   goHome();
@@ -468,7 +475,8 @@ body {
       background-size: 100% 100%;
       background-image: var(--customBackground);
 
-      .login-title, .login-subtitle {
+      .login-title,
+      .login-subtitle {
         text-shadow:
           0 0 10px #fff,
           /* 白色主发光 */ 0 0 20px #fff,

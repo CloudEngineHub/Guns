@@ -82,6 +82,7 @@ export function getCheckedColumns(
             const temp = cols.find((c) => c.id === key);
             const fixed = temp?.fixed ?? d.fixed;
             const checked = temp?.checked ?? true;
+            const width = temp?.width ?? null;
             if (d.children) {
                 const children = getCheckedColumns(
                     d.children,
@@ -90,10 +91,10 @@ export function getCheckedColumns(
                     sortable
                 );
                 if (children.length) {
-                    data.push({ ...d, fixed, checked, children });
+                    data.push({ ...d, fixed, width, checked, children });
                 }
             } else {
-                data.push({ ...d, fixed, checked });
+                data.push({ ...d, fixed, width, checked });
             }
         });
     }

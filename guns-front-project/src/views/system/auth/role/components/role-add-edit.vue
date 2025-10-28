@@ -7,7 +7,7 @@
     :confirm-loading="loading"
     :forceRender="true"
     :title="isUpdate ? '编辑角色' : '新建角色'"
-    :body-style="{ paddingBottom: '8px', height: '500px', overflowY: 'auto' }"
+    :body-style="{ paddingBottom: '8px' }"
     @update:visible="updateVisible"
     @ok="save"
     @close="updateVisible(false)"
@@ -28,7 +28,10 @@ const userStore = useUserStore();
 
 const props = defineProps({
   visible: Boolean,
-  data: Object
+  data: Object,
+  roleType: [String, Number],
+  roleCategoryId: String,
+  companyData: Object,
 });
 
 const emits = defineEmits(['update:visible', 'done']);
@@ -38,8 +41,9 @@ const loading = ref(false);
 const isUpdate = ref(false);
 // 表单数据
 const form = ref({
-  roleType: 20,
+  roleType: undefined,
   statusFlag: 1,
+  roleCategoryId: props.roleCategoryId
 });
 // ref
 const roleFormRef = ref(null);
@@ -58,16 +62,18 @@ const currentCompanyData = computed(() => {
   }
 });
 
-onMounted(async() => {
+onMounted(async () => {
   if (props.data) {
     isUpdate.value = true;
     getDetail();
   } else {
     form.value.roleSort = await getBusinessMaxSort('SYSTEM_BASE_ROLE');
     isUpdate.value = false;
-    if (currentCompanyData.value?.companyId) {
-      form.value.roleCompanyId = currentCompanyData.value?.companyId;
-      form.value.roleCompanyIdWrapper = currentCompanyData.value?.companyName;
+    form.value.roleType = props.roleType || 20;
+    let nowCompanyData = props.companyData ? props.companyData : currentCompanyData.value;
+    if (nowCompanyData?.companyId && form.value.roleType == 20) {
+      form.value.roleCompanyId = nowCompanyData?.companyId;
+      form.value.roleCompanyIdWrapper = nowCompanyData?.companyName;
     }
   }
 });

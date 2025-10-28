@@ -37,7 +37,7 @@ export default {
   // 是否显示面包屑导航
   showBreadcrumb: {
     type: Boolean,
-    default: true
+    default: false
   },
   // 是否显示全局页脚
   showFooter: Boolean,
@@ -175,5 +175,10 @@ export default {
   styleResponsive: {
     type: Boolean,
     default: true
-  }
+  },
+  // 是否显示一级侧栏折叠按钮
+  showNavCollapse: {
+    type: Boolean,
+    default: true
+  },
 };

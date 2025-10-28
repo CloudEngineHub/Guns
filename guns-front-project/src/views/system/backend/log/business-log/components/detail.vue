@@ -8,13 +8,6 @@
               <div class="header-content">
                 <div class="header-content-left">
                   <a-space :size="16">
-                    <a-input v-model:value="where.searchText" placeholder="日志内容 (回车搜索)" @pressEnter="search" class="search-input">
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-
-                    <a-button @click="clearSearch" class="border-radius">重置</a-button>
                     <a-button @click="callbackUp" class="border-radius">返回</a-button>
                   </a-space>
                 </div>
@@ -33,7 +26,22 @@
                   :isInit="false"
                   ref="tableRef"
                   url="/sysLogBusinessContent/page"
+                  showTableTool
+                  :showToolTotal="false"
                 >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.searchText"
+                      placeholder="日志内容 (回车搜索)"
+                      @pressEnter="search"
+                      class="search-input"
+                      :bordered="false"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex == 'logContent'">
                       <div v-html="getContent(record.logContent)"></div>

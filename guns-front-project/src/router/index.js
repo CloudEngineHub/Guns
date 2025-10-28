@@ -103,7 +103,7 @@ router.beforeEach(async (to, from) => {
           data: currentApp.menuList?.map(d => {
             return {
               ...d,
-              path: d.menuType == 40 ? 'http://' + location.host + d.path : d.path
+              path: d.menuType == 30 ? 'http://' + location.host + d.path : d.path
             };
           }),
           idField: 'menuId',
@@ -115,6 +115,7 @@ router.beforeEach(async (to, from) => {
           d.path = d.redirect;
         }
       });
+      console.log(menus);
       userStore.setMenus(menus);
     }
   }

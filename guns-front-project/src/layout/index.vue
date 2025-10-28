@@ -60,15 +60,16 @@
     </template>
     <!-- 顶栏右侧区域 -->
     <template #right="rightProp">
-      <header-tools :is-mobile="rightProp.isMobile"/>
+      <header-tools :is-mobile="rightProp.isMobile" :sideMenuStyle="sideMenuStyle"/>
     </template>
     <!-- 全局页脚 -->
     <template #footer>
       <page-footer />
     </template>
     <!-- 菜单图标 -->
-    <template #icon="{ icon }">
-      <i :class="'iconfont ' + icon"></i>
+    <template #icon="{ icon, item }">
+      <img :src="item.appIconWrapper" alt="" v-if="item?.appId" style="width: 20px;">
+      <i :class="'iconfont ' + icon" v-else></i>
     </template>
     <!-- 自定义菜单标题增加徽章、小红点 -->
     <template #title="{ item }">

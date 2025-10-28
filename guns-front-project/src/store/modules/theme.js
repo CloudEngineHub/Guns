@@ -22,6 +22,8 @@ const DEFAULT_STATE = Object.freeze({
   tabs: [],
   // 是否折叠侧栏
   collapse: localStorage.getItem('collapse') !== 'false',
+  // 是否折叠一级侧栏
+  sideNavCollapse: false,
   // 是否开启页脚
   showFooter: false,
   // 是否开启页签栏
@@ -32,7 +34,7 @@ const DEFAULT_STATE = Object.freeze({
   headStyle: 'light',
   // 侧栏风格: light(亮色), dark(暗色)
   sideStyle: 'dark',
-  // 布局风格: side(默认), mix(混合导航)
+  // 布局风格: side(默认), mix(混合导航), top(顶栏导航)
   layoutStyle: 'mix',
   // 侧栏菜单风格: default(默认), mix(双排侧栏)
   sideMenuStyle: 'default',
@@ -186,6 +188,10 @@ export const useThemeStore = defineStore({
     setCollapse(value) {
       this.collapse = value;
       localStorage.setItem('collapse', value);
+      this.delayUpdateContentSize(800);
+    },
+    setSideNavCollapse(value) {
+      this.sideNavCollapse = value;
       this.delayUpdateContentSize(800);
     },
     setShowFooter(value) {

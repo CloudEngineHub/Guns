@@ -7,12 +7,12 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.2</version>
+        <version>3.2.10</version>
     </parent>
 
     <groupId>com.javaguns.guns</groupId>
     <artifactId>guns</artifactId>
-    <version>8.3.0</version>
+    <version>8.3.4</version>
 
     <name>guns</name>
     <description>Guns主项目</description>
@@ -24,7 +24,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>17</java.version>
         <mysql-connector-java.version>8.0.33</mysql-connector-java.version>
-        <roses.kernel.version>8.3.0</roses.kernel.version>
+        <roses.kernel.version>8.3.4</roses.kernel.version>
         <flyway.version>7.1.1</flyway.version>
     </properties>
 

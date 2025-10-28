@@ -62,11 +62,26 @@
             <check-outlined v-if="layoutStyle === 'side'" />
           </div>
         </a-tooltip>
+        <a-tooltip :title="t('layout.setting.layoutStyles.top')">
+          <div class="guns-bg-base guns-head-dark guns-layout-top" @click="updateLayoutStyle('top')">
+            <check-outlined v-if="layoutStyle === 'top'" />
+          </div>
+        </a-tooltip>
         <a-tooltip :title="t('layout.setting.layoutStyles.mix')">
           <div class="guns-bg-base guns-layout-mix" @click="updateLayoutStyle('mix')">
             <check-outlined v-if="layoutStyle === 'mix'" />
           </div>
         </a-tooltip>
+      </div>
+      <a-divider class="hidden-xs-only" />
+      <!-- 侧栏菜单布局 -->
+      <div v-if="layoutStyle == 'side'" :class="['guns-setting-item', { 'hidden-xs-only': styleResponsive }]">
+        <div class="setting-item-title">
+          {{ t('layout.setting.sideMenuStyle') }}
+        </div>
+        <div class="setting-item-control">
+          <a-switch size="small" :checked="sideMenuStyle === 'mix'" @change="updateSideMenuStyle" />
+        </div>
       </div>
       <a-divider class="hidden-xs-only" />
       <div class="guns-setting-title guns-text-secondary">
@@ -165,8 +180,20 @@ const emit = defineEmits(['update:visible']);
 const { t } = useI18n();
 const themeStore = useThemeStore();
 
-const { showTabs, tabStyle, showFooter, sideStyle, layoutStyle, weakMode, darkMode, color, sideUniqueOpen, sideInitOpenAll } =
-  storeToRefs(themeStore);
+const {
+  showTabs,
+  tabStyle,
+  showFooter,
+  sideStyle,
+  layoutStyle,
+  weakMode,
+  darkMode,
+  color,
+  sideUniqueOpen,
+  sideInitOpenAll,
+  styleResponsive,
+  sideMenuStyle
+} = storeToRefs(themeStore);
 
 // 主题列表
 const themes = ref([
@@ -224,6 +251,14 @@ const updateSideStyle = value => {
 
 const updateLayoutStyle = value => {
   themeStore.setLayoutStyle(value);
+
+  if (value == 'mix') {
+    updateSideMenuStyle(false);
+  }
+};
+
+const updateSideMenuStyle = value => {
+  themeStore.setSideMenuStyle(value ? 'mix' : 'default');
 };
 
 const updateTabStyle = value => {
@@ -263,7 +298,6 @@ const doWithLoading = fun => {
       })
       .catch(e => {
         hide();
-        console.error(e);
         message.error('主题加载失败');
       });
   }, 0);

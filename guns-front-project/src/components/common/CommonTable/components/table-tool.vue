@@ -48,7 +48,7 @@
 
 <script setup name="TableTool">
 import { computed, ref } from 'vue';
-import { getSizeCacheKey } from '../util';
+import { getSizeCacheKey, getColsCacheKey } from '../util';
 
 const props = defineProps({
   // 工具按钮布局
@@ -113,6 +113,9 @@ const columnConfig = () => {
 
 // 关闭自定义列
 const updateColumns = columns => {
+  if (props.cacheKey) {
+    localStorage.setItem(getColsCacheKey(props.cacheKey), JSON.stringify(columns));
+  }
   emits('update:columns', columns);
 };
 

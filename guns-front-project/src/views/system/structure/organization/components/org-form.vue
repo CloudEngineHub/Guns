@@ -1,22 +1,22 @@
 <template>
   <a-form ref="formRef" :model="form" :rules="rules" layout="vertical">
     <a-row :gutter="20">
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构名称:" name="orgName">
           <a-input v-model:value="form.orgName" allow-clear placeholder="请输入机构名称" />
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构编码:" name="orgCode">
           <a-input v-model:value="form.orgCode" allow-clear placeholder="请输入机构编码" />
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="上级机构：" name="parentOrgName">
           <a-input v-model:value="form.parentOrgName" allow-clear placeholder="请选择上级机构" @focus="parentOrgNameClick" />
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="排序:" name="orgSort">
           <a-input-number
             v-model:value="form.orgSort"
@@ -28,7 +28,7 @@
           />
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构类型:" name="orgType">
           <a-radio-group v-model:value="form.orgType">
             <a-radio :value="1">公司</a-radio>
@@ -36,7 +36,16 @@
           </a-radio-group>
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
+        <a-form-item label="层级:" name="levelCode">
+          <a-select v-model:value="form.levelCode" style="width: 100%" placeholder="请选择机构层级">
+            <a-select-option :value="item.levelCode" v-for="item in levelList" :key="item.levelCode"
+              ><span :style="{ color: item.levelColor }">{{ item.levelName }}({{ getLevelNumberName(item) }})</span></a-select-option
+            >
+          </a-select>
+        </a-form-item>
+      </a-col>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构状态:" name="statusFlag">
           <a-radio-group v-model:value="form.statusFlag">
             <a-radio :value="1">启用</a-radio>
@@ -47,12 +56,12 @@
       <a-col :span="24">
         <div class="card-title">其他信息</div>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构简称:" name="orgShortName">
           <a-input v-model:value="form.orgShortName" allow-clear placeholder="请输入机构简称" />
         </a-form-item>
       </a-col>
-      <a-col :xs='24' :sm='24' :md='12'>
+      <a-col :xs="24" :sm="24" :md="12">
         <a-form-item label="机构税号:" name="taxNo">
           <a-input v-model:value="form.taxNo" allow-clear placeholder="请输入机构税号" />
         </a-form-item>
@@ -77,13 +86,16 @@
 </template>
 
 <script setup name="OrgForm">
-import { reactive, ref } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
+import { OrgApi } from '../api/OrgApi';
 
 const props = defineProps({
   // 表单数据
   form: Object,
   // 是否是编辑
-  isUpdate: Boolean
+  isUpdate: Boolean,
+  // 层级数字列表
+  levelNumberList: Array
 });
 
 // 验证规则
@@ -101,6 +113,17 @@ const rules = reactive({
 const showSelect = ref(false);
 // 选择的总数据
 const selectData = ref({});
+// 层级列表
+const levelList = ref([]);
+
+const getLevelNumberName = computed(() => {
+  return item => {
+    let name = '';
+    let numberData = props.levelNumberList.find(a => a.value == item.levelNumber);
+    if (numberData) name = numberData.name;
+    return name;
+  };
+});
 
 // 上机机构点击
 const parentOrgNameClick = () => {
@@ -121,6 +144,15 @@ const closeSelect = val => {
     props.form.orgParentId = '';
     props.form.parentOrgName = '';
   }
+};
+
+onMounted(() => {
+  getLevelList();
+});
+
+// 获取机构层级
+const getLevelList = async () => {
+  levelList.value = await OrgApi.organizationLevelList();
 };
 </script>
 

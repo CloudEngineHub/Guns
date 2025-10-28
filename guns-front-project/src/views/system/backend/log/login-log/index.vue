@@ -7,17 +7,7 @@
             <div class="content-mian-header">
               <div class="header-content">
                 <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-input v-model:value="where.llgName" placeholder="日志名称（回车搜索）" @pressEnter="reload" class="search-input">
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-range-picker v-model:value="dateRange" class="search-date" value-format="YYYY-MM-DD" @change="reload" />
-                    <a-input v-model:value="where.userName" placeholder="请选择用户" class="search-date" @focus="selectUser"></a-input>
-                    <a-button class="border-radius" @click="reload" type="primary">查询</a-button>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
-                  </a-space>
+                  <a-space :size="16"> </a-space>
                 </div>
                 <div class="header-content-right">
                   <a-space :size="16">
@@ -32,21 +22,6 @@
                         <span>清空日志</span>
                       </a-button>
                     </a-popconfirm>
-
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button class="border-radius">
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
                   </a-space>
                 </div>
               </div>
@@ -61,8 +36,63 @@
                   ref="tableRef"
                   :rowSelection="false"
                   url="/loginLog/page"
+                  showTableTool
+                  :showToolTotal="false"
+                  fieldBusinessCode="LOGIN_LOG_TABLE"
                 >
-                  <template #bodyCell></template>
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.llgName"
+                      placeholder="日志名称（回车搜索）"
+                      @pressEnter="reload"
+                      class="search-input"
+                      :bordered="false"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                    <a-divider type="vertical" class="divider" />
+                    <a @click="changeSuperSearch">{{ superSearch ? '收起' : '高级筛选' }} </a>
+                  </template>
+                  <template #bodyCell=""></template>
+                  <template #toolBottom>
+                    <div class="super-search" style="margin-top: 8px" v-show="superSearch">
+                      <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
+                        <a-row :gutter="16">
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="日期范围:">
+                              <a-range-picker
+                                v-model:value="dateRange"
+                                class="search-date"
+                                value-format="YYYY-MM-DD"
+                                @change="reload"
+                                style="width: 100%"
+                              />
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="用户:">
+                              <a-input
+                                v-model:value="where.userName"
+                                placeholder="请选择用户"
+                                class="search-date"
+                                @focus="selectUser"
+                              ></a-input>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label=" " class="not-label">
+                              <a-space :size="16">
+                                <a-button class="border-radius" @click="reload" type="primary">查询</a-button>
+                                <a-button class="border-radius" @click="clear">重置</a-button>
+                              </a-space>
+                            </a-form-item>
+                          </a-col>
+                        </a-row>
+                      </a-form>
+                    </div>
+                  </template>
                 </common-table>
               </div>
             </div>
@@ -70,15 +100,6 @@
         </div>
       </div>
     </div>
-
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
 
     <!-- 选择用户 -->
     <Selection
@@ -95,9 +116,9 @@
 
 <script setup name="LoginLog">
 import { LoginLogApi } from './api/LoginLogApi';
-import { ref, onMounted } from 'vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
+import { ref, onMounted, computed } from 'vue';
 import { message } from 'ant-design-vue/es';
+import { isMobile } from '@/utils/common/util';
 
 // 表格配置
 const columns = ref([
@@ -112,13 +133,13 @@ const columns = ref([
     dataIndex: 'userIdWrapper',
     title: '用户名',
     isShow: true,
-    width: 100,
+    width: 100
   },
   {
     dataIndex: 'account',
     title: '账号',
     isShow: true,
-    width: 100,
+    width: 100
   },
   {
     dataIndex: 'llgName',
@@ -159,10 +180,6 @@ const where = ref({
   userName: '',
   llgName: ''
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('LOGIN_LOG_TABLE');
 
 // 是否显示选择人员弹框
 const visibleSelection = ref(false);
@@ -172,24 +189,29 @@ const selectedData = ref({
   selectUserList: []
 });
 
-onMounted(() => {
-  getColumnData();
+// 是否显示高级查询
+const superSearch = ref(false);
+
+const labelCol = computed(() => {
+  return { xxl: 7, xl: 7, lg: 5, md: 7, sm: 4 };
 });
 
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
+const wrapperCol = computed(() => {
+  return { xxl: 17, xl: 17, lg: 19, md: 17, sm: 20 };
+});
 
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key == '1') {
-    isShowCustom.value = true;
+const spanCol = computed(() => {
+  if (isMobile()) {
+    return { xxl: 6, xl: 8, lg: 12, md: 24, sm: 24, xs: 24 };
   }
+  return { xxl: 6, xl: 8, lg: 24, md: 24, sm: 24, xs: 24 };
+});
+
+onMounted(() => {});
+
+// 切换高级查询
+const changeSuperSearch = () => {
+  superSearch.value = !superSearch.value;
 };
 
 // 点击搜索

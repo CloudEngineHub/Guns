@@ -1,22 +1,26 @@
 <!--公司选择组件-->
 <template>
-  <a-row class="user-select" :gutter="16">
-    <!-- 公司选择 -->
-    <a-col :xs='24' :sm='24' :md='12' class="height100">
-      <SelectionOrgTree @treeSelect="treeSelect" :company-search-flag="true" ref="selectionOrgTreeRef"></SelectionOrgTree>
-    </a-col>
+  <div class="user-select">
+    <guns-split-layout :width="props.isMobileFlag ? '100%' : '50%'" :allowCollapse="false">
+      <!-- 公司选择 -->
+      <div class="user-select-item">
+        <SelectionOrgTree @treeSelect="treeSelect" :company-search-flag="true" ref="selectionOrgTreeRef"></SelectionOrgTree>
+      </div>
 
-    <!-- 已选列表 -->
-    <a-col :xs='24' :sm='24' :md='12' class="common-height paddingTop10">
-      <selected-list v-model:list="companyList" @delete="deleteCompany" @deleteAll="deleteAll" />
-    </a-col>
-  </a-row>
+      <!-- 已选列表 -->
+      <template #content>
+        <div class="user-select-item">
+          <selected-list v-model:list="companyList" @delete="deleteCompany" @deleteAll="deleteAll" />
+        </div>
+      </template>
+    </guns-split-layout>
+  </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
 import SelectedList from './selected-list.vue';
-import SelectionOrgTree from '@/components/common/Selection/components/org-tree.vue';
+import SelectionOrgTree from './org-tree.vue';
 
 const props = defineProps({
   // 是否单选
@@ -24,11 +28,7 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  //是否显示tab栏
-  isShowTab: {
-    type: Boolean,
-    default: false
-  }
+  isMobileFlag: Boolean
 });
 
 const emits = defineEmits(['selectedChange']);
@@ -96,11 +96,14 @@ defineExpose({
 .user-select {
   width: 100%;
   height: 100%;
+  display: flex;
   overflow: hidden;
-}
+  border-radius: 8px;
 
-:deep(.ant-card-body) {
-  height: 100%;
-  overflow: auto;
+  .user-select-item {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(197, 207, 209, 0.4);
+  }
 }
 </style>

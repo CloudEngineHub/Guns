@@ -35,15 +35,11 @@
   background-repeat: no-repeat;
 }
 
-.ant-modal-wrap.guns-modal-resizable-horizontal
-  > .ant-modal
-  > .ant-modal-content:after {
+.ant-modal-wrap.guns-modal-resizable-horizontal > .ant-modal > .ant-modal-content:after {
   cursor: e-resize;
 }
 
-.ant-modal-wrap.guns-modal-resizable-vertical
-  > .ant-modal
-  > .ant-modal-content:after {
+.ant-modal-wrap.guns-modal-resizable-vertical > .ant-modal > .ant-modal-content:after {
   cursor: s-resize;
 }
 
@@ -254,6 +250,13 @@
 .project-modal:not(.guns-modal-wrap-fullscreen) {
   .ant-modal-body {
     max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+.h80:not(.guns-modal-wrap-fullscreen) {
+  .ant-modal-body {
+    height: 80vh;
+    max-height: 80vh;
     overflow-y: auto;
   }
 }

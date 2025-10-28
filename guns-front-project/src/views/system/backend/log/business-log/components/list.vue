@@ -2,123 +2,9 @@
   <div class="guns-layout">
     <div class="guns-layout-content">
       <div class="guns-layout">
+        <div class="guns-layout-content-header">业务日志</div>
         <div class="guns-layout-content-application">
           <div class="content-mian">
-            <div class="content-mian-header">
-              <div class="header-content">
-                <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-input
-                      v-model:value="where.searchText"
-                      placeholder="日志标题或请求URL (回车搜索)"
-                      @pressEnter="search"
-                      class="search-input"
-                    >
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a @click="changeSuperSearch" :class="{ 'fold-btn': isSuperSearch }">{{ isSuperSearch ? '收起' : '高级筛选' }}</a>
-                  </a-space>
-                </div>
-                <div class="header-content-right">
-                  <a-space :size="16">
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button class="border-radius">
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
-                  </a-space>
-                </div>
-              </div>
-              <div class="super-search" v-show="isSuperSearch">
-                <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
-                  <a-row :gutter="16">
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="日志类型:">
-                        <a-select
-                          v-model:value="where.logTypeCode"
-                          show-search
-                          placeholder="请选择日志类型"
-                          allow-clear
-                          @change="search"
-                          @search="logTypeCodeSearch"
-                          autocomplete="off"
-                          class="search-select"
-                          :filter-option="false"
-                        >
-                          <a-select-option
-                            :value="item.dictCode"
-                            v-for="(item, index) in loginTypeCodeList"
-                            :key="index"
-                            :label="item.dictName"
-                            >{{ item.dictName }}</a-select-option
-                          >
-                        </a-select>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="请求方式:">
-                        <a-select
-                          v-model:value="where.httpMethod"
-                          show-search
-                          placeholder="请选择请求方式"
-                          allow-clear
-                          @change="search"
-                          autocomplete="off"
-                          class="search-select"
-                        >
-                          <a-select-option value="POST">POST</a-select-option>
-                          <a-select-option value="GET">GET</a-select-option>
-                        </a-select>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="客户端IP检:">
-                        <a-input
-                          v-model:value="where.clientIp"
-                          allowClear
-                          placeholder="客户端IP检"
-                          @pressEnter="search"
-                          class="search-date"
-                        >
-                          <template #prefix>
-                            <icon-font iconClass="icon-opt-search"></icon-font>
-                          </template>
-                        </a-input>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="时间范围:">
-                        <a-range-picker v-model:value="dateRange" class="search-date" value-format="YYYY-MM-DD" @change="search" />
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="用户:">
-                        <a-input v-model:value="where.userName" placeholder="请选择用户" class="search-date" @focus="selectUser"></a-input>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label=" " class="not-label">
-                        <a-space :size="16">
-                          <a-button class="border-radius" @click="search" type="primary">查询</a-button>
-                          <a-button class="border-radius" @click="clearSearch">重置</a-button>
-                        </a-space>
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
-                </a-form>
-              </div>
-            </div>
             <div class="content-mian-body">
               <div class="table-content">
                 <common-table
@@ -129,20 +15,124 @@
                   :isSort="true"
                   ref="tableRef"
                   url="/sysLogBusiness/page"
+                  showTableTool
+                  :showToolTotal="false"
+                  fieldBusinessCode="BUSINESS_LOG_TABLE"
                 >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.searchText"
+                      placeholder="日志标题或请求URL (回车搜索)"
+                      @pressEnter="search"
+                      class="search-input"
+                      :bordered="false"
+                      style="width: 240px;"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                    <a-divider type="vertical" class="divider" />
+                    <a @click="changeSuperSearch">{{ superSearch ? '收起' : '高级筛选' }} </a>
+                  </template>
+                  <template #toolBottom>
+                    <div class="super-search" style="margin-top: 8px" v-show="superSearch">
+                      <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
+                        <a-row :gutter="16">
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="日志类型:">
+                              <a-select
+                                v-model:value="where.logTypeCode"
+                                show-search
+                                placeholder="请选择日志类型"
+                                allow-clear
+                                @change="search"
+                                @search="logTypeCodeSearch"
+                                autocomplete="off"
+                                class="search-select"
+                                :filter-option="false"
+                              >
+                                <a-select-option
+                                  :value="item.dictCode"
+                                  v-for="(item, index) in loginTypeCodeList"
+                                  :key="index"
+                                  :label="item.dictName"
+                                  >{{ item.dictName }}</a-select-option
+                                >
+                              </a-select>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="请求方式:">
+                              <a-select
+                                v-model:value="where.httpMethod"
+                                show-search
+                                placeholder="请选择请求方式"
+                                allow-clear
+                                @change="search"
+                                autocomplete="off"
+                                class="search-select"
+                              >
+                                <a-select-option value="POST">POST</a-select-option>
+                                <a-select-option value="GET">GET</a-select-option>
+                              </a-select>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="客户端IP检:">
+                              <a-input
+                                v-model:value="where.clientIp"
+                                allowClear
+                                placeholder="客户端IP检"
+                                @pressEnter="search"
+                                class="search-date"
+                              >
+                                <template #prefix>
+                                  <icon-font iconClass="icon-opt-search"></icon-font>
+                                </template>
+                              </a-input>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="时间范围:">
+                              <a-range-picker v-model:value="dateRange" class="search-date" value-format="YYYY-MM-DD" @change="search" />
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="用户:">
+                              <a-input
+                                v-model:value="where.userName"
+                                placeholder="请选择用户"
+                                class="search-date"
+                                @focus="selectUser"
+                              ></a-input>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label=" " class="not-label">
+                              <a-space :size="16">
+                                <a-button class="border-radius" @click="search" type="primary">查询</a-button>
+                                <a-button class="border-radius" @click="clearSearch">重置</a-button>
+                              </a-space>
+                            </a-form-item>
+                          </a-col>
+                        </a-row>
+                      </a-form>
+                    </div>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <!-- 日志业务分类编码 -->
-                    <template v-if="column.dataIndex === 'logTypeCode'">
+                    <template v-if="column?.dataIndex === 'logTypeCode'">
                       <span class="table-record-title" @click="logTypeCodeClick(record.logTypeCode)">{{ record.logTypeCode }}</span>
                     </template>
 
                     <!-- 日志标题 -->
-                    <template v-if="column.dataIndex === 'logTitle'">
+                    <template v-if="column?.dataIndex === 'logTitle'">
                       <span class="table-record-title" @click="detail(record)">{{ record.logTitle }}</span>
                     </template>
 
                     <!-- table操作栏按钮 -->
-                    <template v-else-if="column.key === 'action'">
+                    <template v-else-if="column?.key === 'action'">
                       <a-space>
                         <icon-font
                           iconClass="icon-opt-xiangqing"
@@ -162,15 +152,6 @@
       </div>
     </div>
 
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
-
     <!-- 选择用户 -->
     <Selection
       v-model:visible="visibleSelection"
@@ -187,19 +168,9 @@
 <script setup name="BusinessLogList">
 import { nextTick, onMounted, ref, computed } from 'vue';
 import { isMobile } from '@/utils/common/util';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 import { SysDictTypeApi } from '@/components/DictSelect/api/SysDictTypeApi';
 
-const props = defineProps({
-  isCollapse: Boolean
-});
-
 const emits = defineEmits(['updateType']);
-
-// 是否显示自定义列
-const isShowCustom = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('BUSINESS_LOG_TABLE');
 
 // table dom
 const tableRef = ref(null);
@@ -298,7 +269,7 @@ const selectedData = ref({
   selectUserList: []
 });
 // 是否显示高级查询
-const isSuperSearch = ref(false);
+const superSearch = ref(false);
 
 const labelCol = computed(() => {
   return { xxl: 7, xl: 7, lg: 5, md: 7, sm: 4 };
@@ -309,7 +280,7 @@ const wrapperCol = computed(() => {
 });
 
 const spanCol = computed(() => {
-  if (isMobile() || props.isCollapse) {
+  if (isMobile()) {
     return { xxl: 6, xl: 8, lg: 12, md: 24, sm: 24, xs: 24 };
   }
   return { xxl: 6, xl: 8, lg: 24, md: 24, sm: 24, xs: 24 };
@@ -327,7 +298,7 @@ const search = () => {
 
 // 切换高级查询
 const changeSuperSearch = () => {
-  isSuperSearch.value = !isSuperSearch.value;
+  superSearch.value = !superSearch.value;
 };
 
 /**
@@ -360,26 +331,7 @@ const detail = row => {
   emits('updateType', { type: 'detail', businessLogId: row.businessLogId });
 };
 
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key === '1') {
-    isShowCustom.value = true;
-  }
-};
-
-/**
- * 获取表格配置
- */
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
-
 onMounted(() => {
-  getColumnData();
   getLoginTypeCodeList();
 });
 
