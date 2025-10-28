@@ -127,53 +127,53 @@ Guns是一个现代化的Java应用开发框架，基于主流技术**Spring Boo
 
 <table>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/1b1ba389.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52c5b334.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52646809.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/c02c7be7.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bc2943ac.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/1b1ba389.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52c5b334.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52646809.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/c02c7be7.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bc2943ac.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/aa8017f8.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/de43b7f6.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/636236e9.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/eb69a366.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/661559e2.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/aa8017f8.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/de43b7f6.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/636236e9.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/eb69a366.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/661559e2.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/7b64d9ed.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/179e4c7e.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/dd506aa8.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/d426da96.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b85c2082.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/7b64d9ed.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/179e4c7e.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/dd506aa8.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/d426da96.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b85c2082.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/22cf3c25.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/6b9ba4e4.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/0bd3a450.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/a17a23f7.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b391088e.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/22cf3c25.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/6b9ba4e4.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/0bd3a450.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/a17a23f7.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b391088e.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/9078821a.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/8a296f99.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bfbf6bf2.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/31be2882.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/c9af0123.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/9078821a.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/8a296f99.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bfbf6bf2.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/31be2882.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/c9af0123.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b95cf796.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bb50dd3f.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/1c37b011.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bf9c1bd9.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/f2d9af7f.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/b95cf796.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bb50dd3f.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/1c37b011.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bf9c1bd9.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/f2d9af7f.png" /></td>
   </tr>
   <tr>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/7d48ba1a.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/64a95acf.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/9337d22b.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/ab06518c.png" width="18%"/></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/5a327d3c.png" width="18%"/></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/7d48ba1a.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/64a95acf.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/9337d22b.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/ab06518c.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/5a327d3c.png" /></td>
   </tr>
 </table>
 
