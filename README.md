@@ -37,6 +37,8 @@ Guns正在参加2025 Gitee开源项目评选，开源不易，每一票都是继
 
 ### Guns v8前端启动
 
+前端项目位置：**当前项目的guns-front-project目录下。[guns-front-project](https://gitee.com/stylefeng/guns/tree/master/guns-front-project)**
+
 前端需要使用**Node 20**，请先安装node20，请使用yarn启动，具体启动方法如下：
 
 ```shell
