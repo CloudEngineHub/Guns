@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :visible="props.visible"
-    title="切换公司"
+    title="切换组织"
     :maskClosable="false"
     @cancel="updateShowSwitchCompany(false)"
     :confirm-loading="switchCompanyBtnLoading"

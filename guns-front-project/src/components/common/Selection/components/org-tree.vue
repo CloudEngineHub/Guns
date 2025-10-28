@@ -1,8 +1,6 @@
 <template>
-  <div class="box bgColor box-shadow">
-    <!-- <div class="left-header">
-      <span class="left-header-title">所属组织</span>
-    </div> -->
+  <div class="box bgColor">
+    <div class="tree-header">全部机构</div>
     <!-- 搜索框-->
     <div class="search">
       <a-input v-model:value="searchText" placeholder="请输入机构名称" allow-clear @pressEnter="getOrgTreeData" @change="searchTextChange">
@@ -22,11 +20,15 @@
             @select="selectNode"
             :load-data="onLoadData"
             :tree-data="treeData"
+            v-model:checkedKeys="checkedKeyss"
+            :checkable="!props.isRadio"
+            checkStrictly
+            @check="checkTree"
             :fieldNames="{ children: 'children', title: 'orgName', key: 'orgId', value: 'orgId' }"
           >
             <!-- 图标 -->
             <template #icon="data">
-              <icon-font v-if="data.orgType == 1" icon-class="icon-tree-gongsi" color="#43505e" fontSize="24px"></icon-font>
+              <icon-font v-if="data.orgType == 1" icon-class="icon-nav-gongsi" color="#43505e" fontSize="24px"></icon-font>
               <icon-font v-if="data.orgType == 2" icon-class="icon-tree-dept" color="#43505e" fontSize="24px"></icon-font>
             </template>
             <!-- 标题 -->
@@ -46,14 +48,19 @@ import { ref, onMounted } from 'vue';
 import { OrgApi } from '@/views/system/structure/organization/api/OrgApi';
 import IconFont from '@/components/common/IconFont/index.vue';
 
-const emits = defineEmits(['treeSelect', 'treeData']);
+const emits = defineEmits(['treeSelect', 'treeData', 'checkedTree']);
 
 const props = defineProps({
   // 是否只查询公司
   companySearchFlag: {
     type: Boolean,
     default: false
-  }
+  },
+  // 是否单选
+  isRadio: {
+    type: Boolean,
+    default: true
+  },
 });
 
 // 组织机构名称
@@ -68,6 +75,8 @@ const currentSelectKeys = ref([]);
 const expandedKeys = ref([]);
 // 已经加载的节点
 const treeLoadKeys = ref([]);
+// 多选选中数据
+const checkedKeyss = ref([]);
 
 onMounted(() => {
   getOrgTreeData();
@@ -110,6 +119,11 @@ const selectNode = (selectedKeys, metadata) => {
   emits('treeSelect', selectedKeys, metadata);
 };
 
+// 多选框改变
+const checkTree = (checkedKeys, { checked, node }) => {
+  emits('checkedTree', checked, node);
+};
+
 // 搜索值变化
 const searchTextChange = () => {
   if (!searchText.value) getOrgTreeData();
@@ -142,25 +156,36 @@ const onLoadData = treeNode => {
 };
 
 defineExpose({
-  currentSelectKeys
+  currentSelectKeys,
+  checkedKeyss
 });
 </script>
 
 <style scoped lang="less">
 .box {
-  margin-top: 1px;
-  height: calc(100% - 12px) !important;
-  margin-left: 1px;
+  height: calc(100% - 30px) !important;
+  border-radius: 0;
 }
 .tree-content {
-  padding: 0 12px;
+  padding: 0 16px;
 }
 .search {
   margin-top: 10px;
-  padding: 0 12px;
+  padding: 0 16px;
+}
+.tree-header {
+  height: 48px;
+  padding: 8px 16px;
+  line-height: 32px;
+  background: #f7f7f9;
+  color: #43505e;
+  font-size: 16px;
 }
 :deep(.ant-tree) {
   background-color: #fff !important;
+}
+:deep(.ant-tree-checkbox) {
+  margin: 10px 8px 0 0 !important;
 }
 
 @import url('@/styles/commonTree.less');

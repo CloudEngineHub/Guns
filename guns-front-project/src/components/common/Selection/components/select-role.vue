@@ -1,10 +1,11 @@
 <template>
-  <a-row class="user-select" :gutter="16">
-    <a-col :xs='24' :sm='24' :md='12' class="height100">
-      <a-card :bordered="false" style="height: 100%">
+  <div class="user-select">
+    <guns-split-layout :width="props.isMobileFlag ? '100%' : '50%'" :allowCollapse="false">
+      <div class="user-select-item">
+        <div class="user-header">角色列表</div>
         <!-- 搜索 -->
         <div class="search">
-          <a-input v-model:value="where.roleName" placeholder="角色名称（回车搜索）" @pressEnter="reload" style="width: 300px">
+          <a-input v-model:value="where.roleName" placeholder="角色名称（回车搜索）" @pressEnter="reload">
             <template #prefix>
               <icon-font iconClass="icon-opt-search"></icon-font>
             </template>
@@ -19,6 +20,7 @@
             :isRadio="props.isRadio"
             rowId="roleId"
             ref="tableRef"
+            :showTool="false"
             url="/sysRole/page"
             @onSelect="onSelect"
             @onSelectAll="onSelectAll"
@@ -31,13 +33,15 @@
             </template>
           </common-table>
         </div>
-      </a-card>
-    </a-col>
-    <!-- 已选列表 -->
-    <a-col :xs='24' :sm='24' :md='12' class="height100">
-      <selected-list v-model:list="roleList" @delete="deleteUser" @deleteAll="deleteAll" />
-    </a-col>
-  </a-row>
+      </div>
+      <template #content>
+        <!-- 已选列表 -->
+        <div class="user-select-item">
+          <selected-list v-model:list="roleList" @delete="deleteUser" @deleteAll="deleteAll" />
+        </div>
+      </template>
+    </guns-split-layout>
+  </div>
 </template>
 
 <script setup name="SelectPosition">
@@ -50,11 +54,7 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  //是否显示tab栏
-  isShowTab: {
-    type: Boolean,
-    default: false
-  }
+  isMobileFlag: Boolean
 });
 
 const emits = defineEmits(['selectedChange']);
@@ -151,17 +151,33 @@ defineExpose({
   width: 100%;
   height: 100%;
   overflow: hidden;
+
+  .user-select-item {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(197, 207, 209, 0.4);
+  }
 }
-:deep(.ant-card-body) {
-  padding: 0;
-  height: 100%;
+.user-header {
+  height: 48px;
+  padding: 8px 16px;
+  line-height: 32px;
+  background: #f7f7f9;
+  color: #43505e;
+  font-size: 16px;
 }
 .search {
-  height: 40px;
-  line-height: 40px;
+  margin-top: 10px;
+  padding: 0 16px;
+  height: 36px;
+  border-radius: 5px;
+  margin-bottom: 16px;
+  .ant-input-affix-wrapper {
+    height: 100%;
+  }
 }
 .user-table {
-  height: calc(100% - 50px);
-  padding: 10px 0;
+  height: calc(100% - 48px - 62px);
+  padding: 0 16px;
 }
 </style>

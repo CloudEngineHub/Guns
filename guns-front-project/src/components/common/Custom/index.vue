@@ -172,7 +172,7 @@ const save = () => {
     if (item.width) item.width = Number(item.width);
   });
 
-  const newColumns = getCheckedColumns(columns.value, columns.value, checkedIds.value, false);
+  const newColumns = getCheckedColumns(props.data, columns.value, checkedIds.value, true);
 
   if (props.fieldBusinessCode) {
     let params = {
@@ -184,7 +184,7 @@ const save = () => {
       .then(res => {
         loading.value = false;
         updateVisible(false);
-        emits('done', columns.value);
+        emits('done', newColumns);
       })
       .catch(() => {
         loading.value = false;

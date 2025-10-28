@@ -2,45 +2,9 @@
   <div class="guns-layout">
     <div class="guns-layout-content">
       <div class="guns-layout">
+        <div class="guns-layout-content-header">资源</div>
         <div class="guns-layout-content-application">
           <div class="content-mian">
-            <div class="content-mian-header">
-              <div class="header-content">
-                <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-input
-                      v-model:value="where.searchText"
-                      placeholder="资源名称、路径、类名（回车搜索）"
-                      @pressEnter="reload"
-                      class="search-input"
-                    >
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
-                  </a-space>
-                </div>
-                <div class="header-content-right">
-                  <a-space :size="16">
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button class="border-radius">
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
-                  </a-space>
-                </div>
-              </div>
-            </div>
             <div class="content-mian-body">
               <div class="table-content">
                 <common-table
@@ -48,9 +12,26 @@
                   :where="where"
                   rowId="resourceId"
                   ref="tableRef"
+                  :showToolTotal="false"
+                  showTableTool
                   :rowSelection="false"
                   url="resource/pageList"
+                  fieldBusinessCode="RESOURCE_TABLE"
                 >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.searchText"
+                      placeholder="资源名称、路径、类名（回车搜索）"
+                      @pressEnter="reload"
+                      class="search-input"
+                      style="width: 300px"
+                      :bordered="false"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex == 'requiredLoginFlag'">
                       <a-tag color="blue" v-if="record.requiredLoginFlag == 'Y'">是</a-tag>
@@ -68,25 +49,15 @@
         </div>
       </div>
     </div>
-
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
   </div>
 </template>
 
 <script setup name="AuthResource">
 import { ref, onMounted } from 'vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 
 defineOptions({
-  name: 'AuthResource',
-})
+  name: 'AuthResource'
+});
 
 // 表格配置
 const columns = ref([
@@ -155,40 +126,12 @@ const tableRef = ref(null);
 const where = ref({
   searchText: ''
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('RESOURCE_TABLE');
 
-onMounted(() => {
-  getColumnData();
-});
-
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
-
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key == '1') {
-    isShowCustom.value = true;
-  }
-};
+onMounted(() => {});
 
 // 点击搜索
 const reload = () => {
   tableRef.value.reload();
-};
-
-// 清除搜索条件
-const clear = () => {
-  where.value.searchText = '';
-  reload();
 };
 </script>
 

@@ -7,31 +7,7 @@
             <div class="content-mian-header">
               <div class="header-content">
                 <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-date-picker
-                      v-model:value="where.beginDate"
-                      format="YYYY-MM-DD"
-                      valueFormat="YYYY-MM-DD"
-                      @change="reload"
-                      placeholder="开始时间"
-                    />
-                    <a-date-picker
-                      v-model:value="where.endDate"
-                      format="YYYY-MM-DD"
-                      valueFormat="YYYY-MM-DD"
-                      @change="reload"
-                      placeholder="结束时间"
-                    />
-                    <a-select v-model:value="where.appName" style="width: 205px" placeholder="服务名称" @change="reload">
-                      <a-select-option value="guns">guns</a-select-option>
-                    </a-select>
-                    <a-input v-model:value="where.llgName" placeholder="日志名称（回车搜索）" @pressEnter="reload" class="search-input">
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
-                  </a-space>
+                  <a-space :size="16"> </a-space>
                 </div>
                 <div class="header-content-right">
                   <a-space :size="16">
@@ -41,21 +17,6 @@
                       </template>
                       <span>清空日志</span>
                     </a-button>
-
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button>
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
                   </a-space>
                 </div>
               </div>
@@ -69,7 +30,72 @@
                   ref="tableRef"
                   :rowSelection="false"
                   url="/logManager/page"
+                  showTableTool
+                  :showToolTotal="false"
+                  fieldBusinessCode="OPERATE_LOG_TABLE"
                 >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.searchText"
+                      placeholder="接口名称（回车搜索）"
+                      @pressEnter="reload"
+                      class="search-input"
+                      :bordered="false"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                    <a-divider type="vertical" class="divider" />
+                    <a @click="changeSuperSearch">{{ superSearch ? '收起' : '高级筛选' }} </a>
+                  </template>
+                  <template #toolBottom>
+                    <div class="super-search" style="margin-top: 8px" v-show="superSearch">
+                      <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
+                        <a-row :gutter="16">
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="开始时间:">
+                              <a-date-picker
+                                v-model:value="where.beginDate"
+                                format="YYYY-MM-DD"
+                                valueFormat="YYYY-MM-DD"
+                                @change="reload"
+                                style="width: 100%"
+                                placeholder="开始时间"
+                              />
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="结束时间:">
+                              <a-date-picker
+                                v-model:value="where.endDate"
+                                format="YYYY-MM-DD"
+                                valueFormat="YYYY-MM-DD"
+                                @change="reload"
+                                style="width: 100%"
+                                placeholder="结束时间"
+                              />
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="服务名称:">
+                              <a-select v-model:value="where.appName" style="width: 100%" placeholder="服务名称" @change="reload">
+                                <a-select-option value="guns">guns</a-select-option>
+                              </a-select>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label=" " class="not-label">
+                              <a-space :size="16">
+                                <a-button class="border-radius" @click="reload" type="primary">查询</a-button>
+                                <a-button class="border-radius" @click="clear">重置</a-button>
+                              </a-space>
+                            </a-form-item>
+                          </a-col>
+                        </a-row>
+                      </a-form>
+                    </div>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <template v-if="column.dataIndex == 'requestUrl'">
                       <a @click="openDetail(record)">{{ record.requestUrl }}</a>
@@ -96,27 +122,18 @@
       </div>
     </div>
 
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
-
     <!-- 详情弹框 -->
     <OperateLogDetail v-model:visible="showDetail" v-if="showDetail" :data="current" />
   </div>
 </template>
 
 <script setup name="OperateLog">
-import { ref, onMounted, createVNode } from 'vue';
+import { ref, onMounted, createVNode, computed } from 'vue';
 import { message, Modal } from 'ant-design-vue/es';
 import { OperateLogApi } from './api/OperateLogApi';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 import OperateLogDetail from './components/operate-log-detail.vue';
+import { isMobile } from '@/utils/common/util';
 
 // 表格配置
 const columns = ref([
@@ -156,13 +173,13 @@ const columns = ref([
   {
     title: '时间',
     isShow: true,
-    dataIndex: 'createTime',
+    dataIndex: 'createTime'
   },
   {
     title: '操作',
     key: 'action',
     isShow: true,
-    width: 60,
+    width: 60
   }
 ]);
 // ref
@@ -170,38 +187,39 @@ const tableRef = ref(null);
 
 // 搜索条件
 const where = ref({
-  llgName: '',
+  searchText: '',
   beginDate: '',
   endDate: '',
   appName: null
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
 // 当前行数据
 const current = ref(null);
 // 是否显示详情弹框
 const showDetail = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('OPERATE_LOG_TABLE');
 
-onMounted(() => {
-  getColumnData();
+// 是否显示高级查询
+const superSearch = ref(false);
+
+const labelCol = computed(() => {
+  return { xxl: 7, xl: 7, lg: 5, md: 7, sm: 4 };
 });
 
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
+const wrapperCol = computed(() => {
+  return { xxl: 17, xl: 17, lg: 19, md: 17, sm: 20 };
+});
 
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key == '1') {
-    isShowCustom.value = true;
+const spanCol = computed(() => {
+  if (isMobile()) {
+    return { xxl: 6, xl: 8, lg: 12, md: 24, sm: 24, xs: 24 };
   }
+  return { xxl: 6, xl: 8, lg: 24, md: 24, sm: 24, xs: 24 };
+});
+
+onMounted(() => {});
+
+// 切换高级查询
+const changeSuperSearch = () => {
+  superSearch.value = !superSearch.value;
 };
 
 // 点击搜索
@@ -211,7 +229,7 @@ const reload = () => {
 
 // 清除搜索条件
 const clear = () => {
-  where.value.llgName = '';
+  where.value.searchText = '';
   where.value.beginDate = '';
   where.value.endDate = '';
   where.value.appName = null;

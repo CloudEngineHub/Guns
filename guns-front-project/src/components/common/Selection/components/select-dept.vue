@@ -1,60 +1,28 @@
 <template>
-  <a-row class="user-select" :gutter="16">
-    <!-- 公司部门选择 -->
-    <a-col :xs='24' :sm='24' :md='6' class="height100">
-      <SelectionOrgTree @treeSelect="treeSelect"></SelectionOrgTree>
-    </a-col>
-    <!-- 人员表格 -->
-    <a-col :xs='24' :sm='24' :md='12' class="height100">
-      <a-card :bordered="false" style="height: 100%">
-        <!-- 搜索 -->
-        <div class="search">
-          <a-input v-model:value="where.searchText" placeholder="组织名称、编码（回车搜索）" @pressEnter="reload" style="width: 300px">
-            <template #prefix>
-              <icon-font iconClass="icon-opt-search"></icon-font>
-            </template>
-          </a-input>
+  <div class="user-select">
+    <guns-split-layout :width="props.isMobileFlag ? '100%' : '50%'" :allowCollapse="false">
+      <!-- 公司部门选择 -->
+      <div class="user-select-item">
+        <SelectionOrgTree
+          @treeSelect="treeSelect"
+          @checkedTree="checkedTree"
+          :isRadio="props.isRadio"
+          ref="selectionOrgTreeRef"
+        ></SelectionOrgTree>
+      </div>
+      <template #content>
+        <!-- 已选列表 -->
+        <div class="user-select-item">
+          <selected-list v-model:list="deptList" @delete="deleteUser" @deleteAll="deleteAll" />
         </div>
-        <div class="user-table">
-          <common-table
-            :columns="columns"
-            :where="where"
-            bordered
-            isShowRowSelect
-            :isRadio="props.isRadio"
-            rowId="orgId"
-            ref="tableRef"
-            url="/common/org/pageList"
-            @onSelect="onSelect"
-            @onSelectAll="onSelectAll"
-            @tableListChange="list => tableListChange(list, 'orgId')"
-          >
-            <template #bodyCell="{ column, record }">
-              <!-- 状态 -->
-              <template v-if="column.dataIndex == 'statusFlag'">
-                <a-tag color="blue" v-if="record.statusFlag == 1">启用</a-tag>
-                <a-tag color="red" v-if="record.statusFlag == 2">禁用</a-tag>
-              </template>
-              <template v-if="column.dataIndex == 'orgType'">
-                <a-tag color="cyan" v-if="record.orgType == 1">公司</a-tag>
-                <a-tag color="purple" v-if="record.orgType == 2">部门</a-tag>
-              </template>
-            </template>
-          </common-table>
-        </div>
-      </a-card>
-    </a-col>
-    <!-- 已选列表 -->
-    <a-col :xs='24' :sm='24' :md='6' class="height100">
-      <selected-list v-model:list="deptList" @delete="deleteUser" @deleteAll="deleteAll" />
-    </a-col>
-  </a-row>
+      </template>
+    </guns-split-layout>
+  </div>
 </template>
 
 <script setup name="SelectDept">
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
 import SelectionOrgTree from './org-tree.vue';
-import { radioSelect, checkBox, getSelectedRowKeys } from './common';
 
 const props = defineProps({
   // 是否单选
@@ -62,100 +30,41 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  //是否显示tab栏
-  isShowTab: {
-    type: Boolean,
-    default: false
-  }
+  isMobileFlag: Boolean
 });
 
 const emits = defineEmits(['selectedChange']);
 // 选中列表
 const deptList = ref([]);
 
-// 搜索条件
-const where = ref({
-  searchText: '',
-  orgId: ''
-});
-// ref
-const tableRef = ref(null);
-// 表格配置
-const columns = ref([
-  {
-    key: 'index',
-    title: '序号',
-    width: 60,
-    align: 'center',
-    isShow: true,
-    hideInSetting: true
-  },
-  {
-    dataIndex: 'companyName',
-    title: '所属公司',
-    align: 'center',
-    width: 100,
-    ellipsis: true,
-    isShow: true
-  },
-  {
-    dataIndex: 'orgName',
-    title: '名称',
-    align: 'center',
-    width: 100,
-    ellipsis: true,
-    isShow: true
-  },
-  {
-    dataIndex: 'orgCode',
-    title: '编码',
-    width: 100,
-    align: 'center',
-    isShow: true
-  },
-  {
-    dataIndex: 'statusFlag',
-    title: '状态',
-    align: 'center',
-    width: 100,
-    isShow: true
-  },
-  {
-    dataIndex: 'orgType',
-    title: '类型',
-    align: 'center',
-    width: 100,
-    fixed: 'right',
-    isShow: true
-  }
-]);
+const selectionOrgTreeRef = ref(null);
 
 // 左侧树选中
-const treeSelect = (selectedKeys, metadata) => {
-  where.value.orgId = selectedKeys[0];
-  reload();
+const treeSelect = (selectedKeys, { node }) => {
+  let currentNode = { ...node, bizId: node.orgId, name: node.orgName, children: null };
+  const existingDept = deptList.value.find(item => item.bizId === node.orgId);
+  if (props.isRadio) {
+    deptList.value = existingDept ? [] : [currentNode];
+  } else {
+    if (existingDept) {
+      deleteUser(currentNode);
+    } else {
+      deptList.value.push(currentNode);
+    }
+  }
 };
 
-// 重新查询
-const reload = () => {
-  tableRef.value.reload();
-};
-
-// 选中或取消选中某一列
-const onSelect = (record, selected, selectedRows) => {
-  props.isRadio ? (deptList.value = []) : '';
-  radioSelect(record, selected, deptList.value, 'orgId', 'orgName');
-};
-
-// 全选反选
-const onSelectAll = (selected, selectedRows, changeRows) => {
-  checkBox(selected, changeRows, deptList.value, 'orgId', 'orgName');
-};
-
-// 表格数据变化
-const tableListChange = (list, id) => {
-  if (tableRef.value?.selectedRowList) {
-    tableRef.value.selectedRowList = getSelectedRowKeys(list, id, deptList.value);
+const checkedTree = (checked, node) => {
+  node.bizId = node.orgId;
+  node.name = node.orgName;
+  // 选中状态
+  if (checked) {
+    if (!deptList.value.find(item => item.bizId == node.orgId)) {
+      deptList.value.push(node);
+    }
+  } else {
+    // 取消选中状态
+    deleteUser(node);
   }
 };
 
@@ -176,10 +85,12 @@ const deleteAll = () => {
 watch(
   () => deptList.value,
   val => {
-    if (tableRef.value) {
-      tableListChange(val, 'bizId');
-      emits('selectedChange');
-    }
+    emits('selectedChange');
+    nextTick(() => {
+      if (!props.isRadio && selectionOrgTreeRef.value) {
+        selectionOrgTreeRef.value.checkedKeyss = deptList.value?.map(item => item.bizId);
+      }
+    });
   },
   { deep: true }
 );
@@ -194,17 +105,11 @@ defineExpose({
   width: 100%;
   height: 100%;
   overflow: hidden;
-}
-:deep(.ant-card-body) {
-  padding: 0;
-  height: 100%;
-}
-.search {
-  height: 40px;
-  line-height: 40px;
-}
-.user-table {
-  height: calc(100% - 50px);
-  padding: 10px 0;
+
+  .user-select-item {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(197, 207, 209, 0.4);
+  }
 }
 </style>

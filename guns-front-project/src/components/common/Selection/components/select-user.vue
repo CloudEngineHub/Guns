@@ -1,67 +1,72 @@
 <template>
-  <a-row class="user-select" :gutter="16">
-    <!-- 公司部门选择 -->
-    <a-col :xs='24' :sm='24' :md='6' class="height100">
-      <SelectionOrgTree @treeSelect="treeSelect"></SelectionOrgTree>
-    </a-col>
-    <!-- 人员表格 -->
-    <a-col :xs='24' :sm='24' :md='12' class="height100">
-      <a-card :bordered="false" style="height: 100%">
-        <!-- 搜索 -->
-        <div class="search">
-          <a-input v-model:value="where.searchText" placeholder="姓名、账号（回车搜索）" @pressEnter="reload" style="width: 300px">
-            <template #prefix>
-              <icon-font iconClass="icon-opt-search"></icon-font>
-            </template>
-          </a-input>
+  <div class="user-select">
+    <guns-split-layout :width="props.isMobileFlag ? '100%' : '292px'" :allowCollapse="false">
+      <!-- 公司部门选择 -->
+      <div class="user-select-org">
+        <SelectionOrgTree @treeSelect="treeSelect"></SelectionOrgTree>
+      </div>
+      <template #content>
+        <div class="user-select-right">
+          <!-- 人员表格 -->
+          <div class="user-select-user">
+            <div class="user-header">人员列表</div>
+            <!-- 搜索 -->
+            <div class="search">
+              <a-input v-model:value="where.searchText" placeholder="姓名、账号（回车搜索）" @pressEnter="reload" style="width: 100%">
+                <template #prefix>
+                  <icon-font iconClass="icon-opt-search"></icon-font>
+                </template>
+              </a-input>
+            </div>
+            <div class="user-table">
+              <common-table
+                :columns="columns"
+                :where="where"
+                isShowRowSelect
+                :isRadio="props.isRadio"
+                rowId="userId"
+                ref="tableRef"
+                :showTool="false"
+                url="/sysUser/page"
+                @onSelect="onSelect"
+                @onSelectAll="onSelectAll"
+                @tableListChange="list => tableListChange(list, 'userId')"
+              >
+                <template #bodyCell="{ column, record }">
+                  <!-- 公司 -->
+                  <template v-if="column.dataIndex == 'company'">
+                    {{ record?.userOrgDTO?.companyName ? record?.userOrgDTO?.companyName : '' }}
+                  </template>
+                  <!-- 部门 -->
+                  <template v-if="column.dataIndex == 'dept'">
+                    {{ record?.userOrgDTO?.deptName ? record?.userOrgDTO?.deptName : '' }}
+                  </template>
+                  <!-- 职务 -->
+                  <template v-if="column.dataIndex == 'positionName'">
+                    {{ record?.userOrgDTO?.positionName ? record?.userOrgDTO?.positionName : '' }}
+                  </template>
+                  <!-- 性别 -->
+                  <template v-if="column.dataIndex == 'sex'">
+                    <span v-if="record.sex == 'M'">男</span>
+                    <span v-if="record.sex == 'F'">女</span>
+                  </template>
+                  <!-- 状态 -->
+                  <template v-if="column.dataIndex == 'statusFlag'">
+                    <span v-if="record.statusFlag == 1">启用</span>
+                    <span v-if="record.statusFlag == 2">禁用</span>
+                  </template>
+                </template>
+              </common-table>
+            </div>
+          </div>
+          <!-- 已选列表 -->
+          <div class="user-select-list">
+            <selected-list v-model:list="userList" @delete="deleteUser" @deleteAll="deleteAll" />
+          </div>
         </div>
-        <div class="user-table">
-          <common-table
-            :columns="columns"
-            :where="where"
-            bordered
-            isShowRowSelect
-            :isRadio="props.isRadio"
-            rowId="userId"
-            ref="tableRef"
-            url="/sysUser/page"
-            @onSelect="onSelect"
-            @onSelectAll="onSelectAll"
-            @tableListChange="list => tableListChange(list, 'userId')"
-          >
-            <template #bodyCell="{ column, record }">
-              <!-- 公司 -->
-              <template v-if="column.dataIndex == 'company'">
-                {{ record?.userOrgDTO?.companyName ? record?.userOrgDTO?.companyName : '' }}
-              </template>
-              <!-- 部门 -->
-              <template v-if="column.dataIndex == 'dept'">
-                {{ record?.userOrgDTO?.deptName ? record?.userOrgDTO?.deptName : '' }}
-              </template>
-              <!-- 职务 -->
-              <template v-if="column.dataIndex == 'positionName'">
-                {{ record?.userOrgDTO?.positionName ? record?.userOrgDTO?.positionName : '' }}
-              </template>
-              <!-- 性别 -->
-              <template v-if="column.dataIndex == 'sex'">
-                <span v-if="record.sex == 'M'">男</span>
-                <span v-if="record.sex == 'F'">女</span>
-              </template>
-              <!-- 状态 -->
-              <template v-if="column.dataIndex == 'statusFlag'">
-                <span v-if="record.statusFlag == 1">启用</span>
-                <span v-if="record.statusFlag == 2">禁用</span>
-              </template>
-            </template>
-          </common-table>
-        </div>
-      </a-card>
-    </a-col>
-    <!-- 已选列表 -->
-    <a-col :xs='24' :sm='24' :md='6' class="height100">
-      <selected-list v-model:list="userList" @delete="deleteUser" @deleteAll="deleteAll" />
-    </a-col>
-  </a-row>
+      </template>
+    </guns-split-layout>
+  </div>
 </template>
 
 <script setup name="SelectUser">
@@ -75,11 +80,7 @@ const props = defineProps({
     type: Boolean,
     default: true
   },
-  //是否显示tab栏
-  isShowTab: {
-    type: Boolean,
-    default: false
-  }
+  isMobileFlag: Boolean
 });
 
 const emits = defineEmits(['selectedChange']);
@@ -188,18 +189,70 @@ defineExpose({
 .user-select {
   width: 100%;
   height: 100%;
+  display: flex;
   overflow: hidden;
+  border-radius: 8px;
+
+  .user-select-org {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(197, 207, 209, 0.4);
+  }
+
+  .user-select-right {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+
+    .user-select-user {
+      width: calc(100% - 292px - 16px);
+      height: 100%;
+      border: 1px solid rgba(197, 207, 209, 0.4);
+      .user-header {
+        height: 48px;
+        padding: 8px 16px;
+        line-height: 32px;
+        background: #f7f7f9;
+        color: #43505e;
+        font-size: 16px;
+      }
+
+      .search {
+        margin-top: 10px;
+        padding: 0 16px;
+        height: 36px;
+        border-radius: 5px;
+        margin-bottom: 16px;
+        .ant-input-affix-wrapper {
+          height: 100%;
+        }
+      }
+      .user-table {
+        height: calc(100% - 48px - 62px);
+        padding: 0 16px;
+      }
+    }
+    .user-select-list {
+      margin-left: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(197, 207, 209, 0.4);
+      width: 292px;
+      height: 100%;
+    }
+  }
 }
-:deep(.ant-card-body) {
-  padding: 0;
-  height: 100%;
-}
-.search {
-  height: 40px;
-  line-height: 40px;
-}
-.user-table {
-  height: calc(100% - 50px);
-  padding: 10px 0;
+@media screen and (max-width: 768px) {
+  .user-select-right {
+    display: block !important;
+  }
+  .user-select-user {
+    width: 100% !important;
+  }
+  .user-select-list {
+    margin-top: 16px;
+    width: 100% !important;
+    margin-left: 0 !important;
+  }
 }
 </style>

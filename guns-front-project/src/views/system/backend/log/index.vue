@@ -1,51 +1,49 @@
 <template>
-  <div class="guns-layout" :class="[{ 'guns-collapse': !isCollapse }]">
-    <div class="guns-layout-sidebar">
-      <div class="sidebar-content">
+  <div class="guns-layout">
+    <guns-split-layout :resizable="false">
+      <div class="guns-layout-sidebar width-100 p-t-12">
         <div class="sidebar-content">
-          <a-menu
-            v-model:selectedKeys="selectedKeys"
-            class="sidebar-menu"
-            mode="inline"
-            :open-keys="openKeys"
-            @select="selectChange"
-            @openChange="openChange"
-          >
-            <a-sub-menu key="1">
-              <template #title>日志查看</template>
-              <div v-permission="['BUSINESS_LOG']">
-                <a-menu-item key="1"> 业务日志 </a-menu-item>
-              </div>
-              <div v-permission="['LOG_LOGIN']">
-                <a-menu-item key="2"> 登录日志 </a-menu-item>
-              </div>
-              <div v-permission="['OPERATE_LOG']">
-                <a-menu-item key="3"> API日志 </a-menu-item>
-              </div>
-              <div v-permission="['SECURITY_LOG']">
-                <a-menu-item key="4"> 安全日志 </a-menu-item>
-              </div>
-            </a-sub-menu>
-          </a-menu>
+          <div class="sidebar-content">
+            <a-menu
+              v-model:selectedKeys="selectedKeys"
+              class="sidebar-menu"
+              mode="inline"
+              :open-keys="openKeys"
+              @select="selectChange"
+              @openChange="openChange"
+            >
+              <a-sub-menu key="1">
+                <template #title>日志查看</template>
+                <div v-permission="['BUSINESS_LOG']">
+                  <a-menu-item key="1"> 业务日志 </a-menu-item>
+                </div>
+                <div v-permission="['LOG_LOGIN']">
+                  <a-menu-item key="2"> 登录日志 </a-menu-item>
+                </div>
+                <div v-permission="['OPERATE_LOG']">
+                  <a-menu-item key="3"> API日志 </a-menu-item>
+                </div>
+                <div v-permission="['SECURITY_LOG']">
+                  <a-menu-item key="4"> 安全日志 </a-menu-item>
+                </div>
+              </a-sub-menu>
+            </a-menu>
+          </div>
         </div>
       </div>
-      <!-- 折叠按钮 -->
-      <div class="collapse-btn" @click="toggleCollapse()">
-        <CaretRightOutlined v-if="isCollapse" />
-        <CaretLeftOutlined v-else />
-      </div>
-    </div>
-    <div class="collapse-mask" @click="toggleCollapse()"></div>
-    <div class="guns-layout-content">
-      <!-- 业务日志 -->
-      <BusinessLog v-if="currentMenuSelect == '1'" :isCollapse="isCollapse"/>
-      <!-- 登录日志 -->
-      <LoginLog v-if="currentMenuSelect == '2'"/>
-      <!-- 操作日志 -->
-      <OperateLog v-if="currentMenuSelect == '3'"/>
-      <!-- 安全 -->
-      <SecurityLog v-if="currentMenuSelect == '4'" :isCollapse="isCollapse"/>
-    </div>
+      <template #content>
+        <div class="guns-layout-content" style="padding: 0;">
+          <!-- 业务日志 -->
+          <BusinessLog v-if="currentMenuSelect == '1'" />
+          <!-- 登录日志 -->
+          <LoginLog v-if="currentMenuSelect == '2'" />
+          <!-- 操作日志 -->
+          <OperateLog v-if="currentMenuSelect == '3'" />
+          <!-- 安全 -->
+          <SecurityLog v-if="currentMenuSelect == '4'" />
+        </div>
+      </template>
+    </guns-split-layout>
   </div>
 </template>
 
@@ -54,8 +52,8 @@ import { useUserStore } from '@/store/modules/user';
 import { ref, defineAsyncComponent, onMounted, computed } from 'vue';
 
 defineOptions({
-  name: 'SystemLog',
-})
+  name: 'SystemLog'
+});
 
 const userStore = useUserStore();
 
@@ -75,9 +73,6 @@ const selectedKeys = ref([]);
 
 // 当前菜单选中
 const currentMenuSelect = ref('');
-
-// 是否显示折叠按钮
-const isCollapse = ref(false);
 
 // 权限列表
 const authorities = computed(() => {
@@ -111,16 +106,6 @@ onMounted(() => {
     selectChange({ key });
   }
 });
-
-const toggleCollapse = () => {
-  isCollapse.value = !isCollapse.value;
-};
 </script>
 
-<style scoped lang="less">
-@import url('@/styles/commonMenu.less');
-.guns-layout-sidebar {
-  width: v-bind('isCollapse ? 0 : "252px"');
-  padding: v-bind('isCollapse ? 0 : "12px"');
-}
-</style>
+<style scoped lang="less"></style>

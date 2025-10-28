@@ -7,19 +7,7 @@
             <div class="content-mian-header">
               <div class="header-content">
                 <div class="header-content-left">
-                  <a-space :size="16">
-                    <a-input
-                      v-model:value="where.fileOriginName"
-                      placeholder="文件名称（回车搜索）"
-                      @pressEnter="reload"
-                      class="search-input"
-                    >
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
-                  </a-space>
+                  <a-space :size="16"> </a-space>
                 </div>
                 <div class="header-content-right">
                   <a-space :size="16">
@@ -54,20 +42,6 @@
                         <span>上传到数据库（1MB限制）</span>
                       </a-button>
                     </a-upload>
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button class="border-radius">
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
                   </a-space>
                 </div>
               </div>
@@ -81,7 +55,23 @@
                   ref="tableRef"
                   :rowSelection="false"
                   url="/sysFileInfo/fileInfoListPage"
+                  showTableTool
+                  :showToolTotal="false"
+                  fieldBusinessCode="FILE_TABLE"
                 >
+                  <template #toolLeft>
+                    <a-input
+                      v-model:value="where.fileOriginName"
+                      placeholder="文件名称（回车搜索）"
+                      @pressEnter="reload"
+                      class="search-input"
+                      :bordered="false"
+                    >
+                      <template #prefix>
+                        <icon-font iconClass="icon-opt-search"></icon-font>
+                      </template>
+                    </a-input>
+                  </template>
                   <template #bodyCell="{ column, record }">
                     <!-- 姓名 -->
                     <template v-if="column.dataIndex == 'fileOriginName'">
@@ -139,15 +129,6 @@
       </div>
     </div>
 
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
-
     <!-- 文件详情弹框 -->
     <FileDetail v-model:visible="showDetail" v-if="showDetail" :data="current" />
   </div>
@@ -161,11 +142,10 @@ import { message, Modal } from 'ant-design-vue/es';
 import { API_BASE_PREFIX } from '@/config/setting';
 import FileDetail from './components/file-detail.vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 
 defineOptions({
-  name: 'File',
-})
+  name: 'File'
+});
 
 // 表格配置
 const columns = ref([
@@ -254,14 +234,10 @@ const tableRef = ref(null);
 const where = ref({
   fileOriginName: ''
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
 // 当前行数据
 const current = ref(null);
 // 是否显示详情弹框
 const showDetail = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('FILE_TABLE');
 // 上传文件的url
 const FileUploadUrls = ref(`${API_BASE_PREFIX}${FileUploadUrl}?secretFlag=N`);
 // 上传文件的url（上传到数据库）
@@ -271,35 +247,11 @@ const headers = ref({
   Authorization: getToken()
 });
 
-onMounted(() => {
-  getColumnData();
-});
-
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
-
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key == '1') {
-    isShowCustom.value = true;
-  }
-};
+onMounted(() => {});
 
 // 点击搜索
 const reload = () => {
   tableRef.value.reload();
-};
-
-// 清除搜索条件
-const clear = () => {
-  where.value.fileOriginName = '';
-  reload();
 };
 
 // 详情点击

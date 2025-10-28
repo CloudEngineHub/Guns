@@ -68,7 +68,7 @@ export const useUserStore = defineStore({
           data: activeApp.menuList?.map(d => {
             return {
               ...d,
-              path: d.menuType == 40 ? 'http://' + location.host + d.path : d.path
+              path: d.menuType == 30 ? 'http://' + location.host + d.path : d.path
             };
           }),
           idField: 'menuId',

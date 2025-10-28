@@ -34,14 +34,16 @@
     <!-- 顶部菜单区 -->
     <div class="guns-admin-header-nav">
       <LayoutMenus
-        :data="menus"
+        :data="headerMenus"
         :theme="theme"
         mode="horizontal"
-        v-if="menus"
+        v-if="headerMenus"
         title-slot="top-title"
-        :showIcon="false"
-        :selected-keys="active"
+        :showIcon="showIcon"
+        :selected-keys="currentActive"
+        :is-mix-side-menu="isMixSideMenu"
         @titleClick="onTitleClick"
+        @appChange="appChange"
       >
         <template v-for="name in Object.keys($slots)" #[name]="slotProps">
           <slot :name="name" v-bind="slotProps || {}"></slot>
@@ -54,9 +56,12 @@
 </template>
 
 <script>
-import { defineComponent, computed } from 'vue';
-import { Breadcrumb as ABreadcrumb, BreadcrumbItem as ABreadcrumbItem, message } from 'ant-design-vue/es';
+import { defineComponent, computed, ref } from 'vue';
+import { Breadcrumb as ABreadcrumb, BreadcrumbItem as ABreadcrumbItem } from 'ant-design-vue/es';
 import LayoutMenus from './layout-menus';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/modules/user';
+import { isExternalLink } from '@/utils/common/menu-util';
 import props from '../props';
 
 export default defineComponent({
@@ -99,9 +104,17 @@ export default defineComponent({
     // 面包屑导航分隔符
     breadcrumbSeparator: String,
     isMobile: Boolean,
+    // 是否是侧栏双菜单
+    isMixSideMenu: Boolean
   },
   emits: ['logo-click', 'reload-page', 'toggle-collapse', 'title-click'],
   setup(props, { emit }) {
+    // 路由
+    const router = useRouter();
+    // store
+    const userStore = useUserStore();
+
+    const path = ref('');
 
     // 是否是主色顶栏
     const isPrimary = computed(() => props.headStyle === 'primary');
@@ -109,6 +122,52 @@ export default defineComponent({
     // 顶栏菜单主题
     const theme = computed(() => {
       return isPrimary.value ? 'light' : props.headStyle;
+    });
+
+    // 应用列表
+    const appList = computed(() => {
+      return userStore.appList;
+    });
+
+    // 当前激活应用
+    const activeApp = computed(() => {
+      return userStore.activeApp;
+    });
+
+    const headerMenus = computed(() => {
+      if (props.isMixSideMenu) {
+        return appList.value?.map(item => {
+          return {
+            ...item,
+            meta: {
+              hide: false,
+              title: item.appName,
+              icon: item.appIconWrapper
+            },
+            component: '',
+            path: item.appId
+          };
+        });
+      } else {
+        return props.menus;
+      }
+    });
+
+    const currentActive = computed(() => {
+      if (props.isMixSideMenu) {
+        const appId = activeApp.value?.appId;
+        return appId ? [appId] : [];
+      } else {
+        return props.active;
+      }
+    });
+
+    const showIcon = computed(() => {
+      if (props.isMixSideMenu) {
+        return true;
+      } else {
+        return false;
+      }
     });
 
     /* 折叠展开侧栏 */
@@ -131,17 +190,66 @@ export default defineComponent({
       emit('title-click', key, item);
     };
 
+    // 应用切换
+    const appChange = e => {
+      const item = appList.value.find(a => a.appId == e.key);
+      let isNewTab = false;
+      if (e.domEvent?.key == 'Control' || e.domEvent?.keyCode == 17 || e.domEvent?.ctrlKey) {
+        isNewTab = true;
+      }
+
+      if (item.appId != activeApp.value.appId) {
+        if (item.menuList && item.menuList.length) {
+          setPath(item.menuList);
+          if (isNewTab) {
+            const { href } = router.resolve({
+              path: path.value
+            });
+            window.open(href, '_blank');
+          } else {
+            if (isExternalLink(path.value)) {
+              const { href } = router.resolve({
+                path: path.value
+              });
+              window.open(href, '_blank');
+            } else {
+              router.push(path.value);
+            }
+          }
+        }
+      }
+    };
+
+    // 设置path
+    const setPath = arr => {
+      if (!arr[0].children || arr[0].children.length == 0) {
+        path.value = arr[0].path;
+        if (arr[0].appDesignBusinessId) {
+          path.value = path.value + '?businessId=' + arr[0].appDesignBusinessId;
+        }
+      } else {
+        setPath(arr[0].children);
+      }
+    };
+
     return {
       isPrimary,
       theme,
+      headerMenus,
+      appList,
+      activeApp,
+      currentActive,
+      showIcon,
+      path,
+      appChange,
+      setPath,
       toggleCollapse,
       reloadPage,
       onLogoClick,
-      onTitleClick,
+      onTitleClick
     };
   }
 });
 </script>
 
-<style scoped lang="less">
-</style>
+<style scoped lang="less"></style>

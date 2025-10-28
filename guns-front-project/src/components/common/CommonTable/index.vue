@@ -36,13 +36,9 @@
       :data-source="list"
       :row-key="rowId"
       :size="tableSize"
-      class="table"
+      :class="['table', { 'table-radius': !props.showTool }]"
       :bordered="bordered"
-      :columns="
-        tableColumn.filter((col, num) => {
-          if (col?.checked) return col;
-        })
-      "
+      :columns="tableShowColumn"
       :loading="tableLoading"
       :defaultExpandedRowKeys="props.defaultExpandedRowKeys"
       v-model:expandedRowKeys="expandedRowKeys"
@@ -84,7 +80,7 @@
 import { getCacheSize, getInitColumnsAndCache } from './util';
 import { onMounted, reactive, ref, useSlots, watch, nextTick, defineAsyncComponent } from 'vue';
 import Request from '@/utils/request/request-util';
-import { camelToUnderline } from '@/utils/common/util';
+import { camelToUnderline, deepClone } from '@/utils/common/util';
 import { CustomApi } from '@/components/common/Custom/api/CustomApi';
 
 const TableTool = defineAsyncComponent(() => import('./components/table-tool.vue'));
@@ -255,6 +251,7 @@ const emits = defineEmits([
   'customRowClick',
   'getTotal',
   'update:selection',
+  'reload',
   'expand',
   'size-change',
   'columns-change',
@@ -299,6 +296,8 @@ const tableFullscreen = ref(false);
 // 表格列配置
 const tableColumn = ref([]);
 
+const tableShowColumn = ref([]);
+
 onMounted(() => {
   getColumnConfig(true);
 
@@ -317,9 +316,41 @@ const getColumnConfig = async (init = false) => {
     }
   }
   if (newColumns) {
-    tableColumn.value = getInitColumnsAndCache(newColumns, props.cacheKey, true);
+    if (props.cacheKey) {
+      tableColumn.value = getInitColumnsAndCache(newColumns, props.cacheKey, true);
+    } else {
+      tableColumn.value = newColumns;
+    }
   } else {
     tableColumn.value = [];
+  }
+  getColumns();
+};
+
+const getColumns = () => {
+  let columnsList = deepClone(tableColumn.value);
+  tableShowColumn.value = setColumns(columnsList);
+
+  function setColumns(arr) {
+    if (!Array.isArray(arr) || arr.length === 0) {
+      return [];
+    }
+
+    return arr.filter(item => {
+      if (item.checked === false) {
+        return false;
+      }
+
+      if (item.children && Array.isArray(item.children)) {
+        item.children = setColumns(item.children);
+
+        if (item.children.length === 0) {
+          return false;
+        }
+      }
+
+      return true;
+    });
   }
 };
 
@@ -378,7 +409,7 @@ const getTableList = () => {
           emits('getTotal', list.value?.length ?? 0);
         }
 
-        // emits('tableListChange', list.value);
+        emits('tableListChange', list.value);
       })
       .finally(() => (tableLoading.value = false));
   }
@@ -466,6 +497,7 @@ const reload = () => {
   nextTick(() => {
     pagination.current = 1;
     getTableList();
+    emits('reload');
   });
 };
 
@@ -522,6 +554,7 @@ const onTableSizeChange = value => {
 /* 表格列改变事件 */
 const onColumnsChange = value => {
   tableColumn.value = value;
+  getColumns();
   emits('columns-change', value);
 };
 
@@ -544,7 +577,12 @@ watch(
 watch(
   () => props.columns,
   columns => {
-    onColumnsChange(columns);
+    const hasCheckedField = columns.some(item => 'checked' in item);
+    if (!hasCheckedField) {
+      getColumnConfig();
+    } else {
+      onColumnsChange(columns);
+    }
   },
   {
     deep: true
@@ -554,9 +592,6 @@ watch(
 watch(
   () => props.selection,
   selection => {
-    if (props.isRadio) {
-      return;
-    }
     if (selection?.length) {
       const keys = selection.map(d => getFieldValue(d, props.rowId));
       if (keys.length !== selectedRowList.value.length) {
@@ -684,6 +719,7 @@ defineExpose({
   color: #60666b;
 }
 :deep(.ant-table) {
+  border-radius: 0 0 8px 8px;
   border-left: 1px solid rgba(197, 207, 209, 0.4);
   border-right: 1px solid rgba(197, 207, 209, 0.4);
   border-bottom: 1px solid rgba(197, 207, 209, 0.4);
@@ -696,6 +732,15 @@ defineExpose({
     width: 10px !important;
   }
 }
+.table-radius {
+  :deep(.ant-table) {
+    border-radius: 8px;
+  }
+  :deep(.ant-table-header) {
+    border-radius: 8px 8px 0 0;
+  }
+}
+
 .table-height-100 {
   :deep(.ant-spin-nested-loading) {
     height: 100%;

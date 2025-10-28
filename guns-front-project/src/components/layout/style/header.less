@@ -12,6 +12,13 @@
   box-sizing: border-box;
   position: relative;
 
+  .guns-admin-header-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
   // logo
   .guns-admin-logo {
     width: @sidebar-width;
@@ -63,16 +70,20 @@
 
   // nav
   .guns-admin-header-nav {
+    height: 100%;
     flex: 1;
     overflow: hidden;
 
     & > .ant-menu {
+      height: 100%;
       border: none;
       background: none;
       line-height: @header-height;
 
       .ant-menu-item,
       .ant-menu-submenu {
+        display: flex;
+        align-items: center;
         top: auto;
         margin-top: 0;
       }
@@ -143,6 +154,13 @@
     position: relative;
     height: 100%;
 
+    .guns-admin-header-avatar-img {
+      width: @header-avatar-size;
+      height: @header-avatar-size;
+      line-height: @header-avatar-size;
+      border-radius: 50%;
+    }
+
     .ant-avatar {
       width: @header-avatar-size;
       height: @header-avatar-size;
@@ -151,6 +169,48 @@
       & + span {
         padding-left: @padding-xs;
       }
+    }
+  }
+}
+
+.guns-admin-side-mix .guns-admin-header .guns-admin-header-nav {
+  .ant-menu-item-selected::after {
+    border-bottom: 0px !important;
+  }
+  .ant-menu-item-active::after {
+    border-bottom: 0px !important;
+  }
+  .ant-menu-item:hover::after {
+    border-bottom: 0px !important;
+  }
+
+  .ant-menu-item:hover::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu:hover::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-active::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-active::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-open::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-open::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-item-selected::after,
+  .ant-menu-horizontal:not(.ant-menu-dark) > .ant-menu-submenu-selected::after {
+    border-bottom: 0px !important;
+  }
+  .ant-menu-item::after {
+    border-bottom: 0px !important;
+  }
+
+  .ant-menu-item-selected {
+    height: 36px;
+    margin-top: 8px;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 2px 6px 0 rgba(146, 139, 255, 0.3);
+
+    .ant-menu-title-content {
+      color: #3f78df;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 700;
+      line-height: 20px; /* 125% */
     }
   }
 }

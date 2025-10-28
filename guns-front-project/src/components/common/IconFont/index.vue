@@ -1,11 +1,13 @@
 <template>
   <span :style="style" class="icon-font-span">
-    <i v-if="type === 'unicode'" :style="{ color: color, fontSize: fontSize, fontWeight: fontWeight }" class="iconfont">{{
-        iconClass
-      }}</i>
+    <i v-if="type === 'unicode'" :style="{ color: color, fontSize: fontSize, fontWeight: fontWeight }" class="iconfont">{{ iconClass }}</i>
 
-    <i v-if="type === 'class'" :style="{ color: color, fontSize: fontSize, fontWeight: fontWeight }"
-       class="iconfont" :class="iconClass"></i>
+    <i
+      v-if="type === 'class'"
+      :style="{ color: color, fontSize: fontSize, fontWeight: fontWeight, height: fontSize, lineHeight: fontSize }"
+      class="iconfont"
+      :class="iconClass"
+    ></i>
 
     <svg v-if="type === 'svg'" :width="width" :height="height" aria-hidden="true" class="svg-icon">
       <use :fill="color" :xlink:href="`#${iconClass}`"></use>
@@ -34,12 +36,12 @@ defineProps({
   // 宽 svg
   width: {
     type: String,
-    default: ''
+    default: '16px'
   },
   // 高 svg
   height: {
     type: String,
-    default: ''
+    default: '16px'
   },
   // 大小  unicode
   fontSize: {
@@ -55,7 +57,7 @@ defineProps({
   style: {
     type: Object,
     default: {}
-  },
+  }
 });
 </script>
 
@@ -64,6 +66,7 @@ defineProps({
   cursor: pointer;
 }
 .icon-font-span {
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;

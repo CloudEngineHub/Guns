@@ -6,6 +6,14 @@ import Request from '@/utils/request/request-util';
  */
 export class PermissionApi {
   /**
+   * 获取角色分类和角色组成的树
+   * @param {*} params
+   * @returns
+   */
+  static getRoleCategoryAndRoleTree(params) {
+    return Request.getAndLoadData('/permission/getRoleCategoryAndRoleTree', params);
+  }
+  /**
    * 获取角色绑定的权限列表
    * @param {*} params
    * @returns
@@ -33,21 +41,39 @@ export class PermissionApi {
   }
 
   /**
-   * 获取角色的数据权限详情
+   * 获取角色的数据范围列表
    * @param {*} params
    * @returns
    */
-  static getRoleBindDataScope(params) {
-    return Request.getAndLoadData('/permission/getRoleBindDataScope', params);
+  static getRoleDataScopePageList(params) {
+    return Request.getAndLoadData('/roleDataScope/getRoleDataScopePageList', params);
   }
 
   /**
-   * 角色绑定数据权限的配置
+   * 新增一个角色的数据权限
    * @param {*} params
    * @returns
    */
-  static updateRoleBindDataScope(params) {
-    return Request.post('/permission/updateRoleBindDataScope', params);
+  static addRoleDataScope(params) {
+    return Request.post('/roleDataScope/addRoleDataScope', params);
+  }
+
+  /**
+   * 修改角色的数据权限
+   * @param {*} params
+   * @returns
+   */
+  static editRoleDataScope(params) {
+    return Request.post('/roleDataScope/editRoleDataScope', params);
+  }
+
+  /**
+   * 删除角色的数据权限
+   * @param {*} params
+   * @returns
+   */
+  static roleDataScopeDelete(params) {
+    return Request.post('/roleDataScope/delete', params);
   }
 
   /**

@@ -37,7 +37,7 @@
             <template #icon="data">
               <icon-font
                 v-if="data.orgType == 1"
-                icon-class="icon-tree-gongsi"
+                icon-class="icon-nav-gongsi"
                 color="#43505e"
                 fontSize="24px"
               ></icon-font>

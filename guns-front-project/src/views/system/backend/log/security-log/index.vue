@@ -2,107 +2,98 @@
   <div class="guns-layout">
     <div class="guns-layout-content">
       <div class="guns-layout">
+        <div class="guns-layout-content-header">安全日志</div>
         <div class="guns-layout-content-application">
           <div class="content-mian">
-            <div class="content-mian-header">
-              <div class="header-content">
-                <div class="header-content-left">
-                  <a-space :size="16">
+            <div class="content-mian-body">
+              <div class="table-content">
+                <common-table
+                    :scroll="{ y: '100%' }"
+                    :columns="columns"
+                    :where="where"
+                    rowId="securityLogId"
+                    size="default"
+                    ref="tableRef"
+                    :rowSelection="false"
+                    url="/logSecurity/page"
+                    showTableTool
+                    :showToolTotal="false"
+                    fieldBusinessCode="SECURITY_LOG_TABLE"
+                >
+                  <template #toolLeft>
                     <a-input
-                      v-model:value="where.logContent"
-                      placeholder="安全日志内容（回车搜索）"
-                      @pressEnter="reload"
-                      class="search-input"
+                        v-model:value="where.logContent"
+                        placeholder="安全日志内容（回车搜索）"
+                        @pressEnter="reload"
+                        class="search-input"
+                        :bordered="false"
+                        style="width: 240px;"
                     >
                       <template #prefix>
                         <icon-font iconClass="icon-opt-search"></icon-font>
                       </template>
                     </a-input>
-                    <a @click="changeSuperSearch" :class="{ 'fold-btn': isSuperSearch }">{{ isSuperSearch ? '收起' : '高级筛选' }}</a>
-                  </a-space>
-                </div>
-                <div class="header-content-right">
-                  <a-space :size="16">
-                    <a-dropdown>
-                      <template #overlay>
-                        <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
-                        </a-menu>
-                      </template>
-                      <a-button class="border-radius">
-                        更多
-                        <small-dash-outlined />
-                      </a-button>
-                    </a-dropdown>
-                  </a-space>
-                </div>
-              </div>
-              <div class="super-search" v-show="isSuperSearch">
-                <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
-                  <a-row :gutter="16">
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="请求方式:">
-                        <a-select
-                          v-model:value="where.httpMethod"
-                          show-search
-                          placeholder="请选择请求方式"
-                          allow-clear
-                          @change="reload"
-                          autocomplete="off"
-                          class="search-select"
-                        >
-                          <a-select-option value="POST">POST</a-select-option>
-                          <a-select-option value="GET">GET</a-select-option>
-                        </a-select>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="时间范围:">
-                        <a-range-picker v-model:value="dateRange" class="search-date" value-format="YYYY-MM-DD" @change="reload" />
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="客户端的ip:">
-                        <a-input v-model:value="where.clientIp" placeholder="客户端的ip" class="search-date" @pressEnter="reload"></a-input>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label="当前用户请求的url:">
-                        <a-input
-                          v-model:value="where.requestUrl"
-                          placeholder="当前用户请求的url"
-                          class="search-date"
-                          @pressEnter="reload"
-                        ></a-input>
-                      </a-form-item>
-                    </a-col>
-                    <a-col v-bind="spanCol">
-                      <a-form-item label=" " class="not-label">
-                        <a-space :size="16">
-                          <a-button class="border-radius" @click="reload" type="primary">查询</a-button>
-                          <a-button class="border-radius" @click="clear">重置</a-button>
-                        </a-space>
-                      </a-form-item>
-                    </a-col>
-                  </a-row>
-                </a-form>
-              </div>
-            </div>
-            <div class="content-mian-body">
-              <div class="table-content">
-                <common-table
-                  :columns="columns"
-                  :where="where"
-                  rowId="securityLogId"
-                  size="default"
-                  ref="tableRef"
-                  :rowSelection="false"
-                  url="/logSecurity/page"
-                >
-                  <template #bodyCell></template>
+                    <a-divider type="vertical" class="divider"/>
+                    <a @click="changeSuperSearch">{{ superSearch ? '收起' : '高级筛选' }} </a>
+                  </template>
+                  <template #bodyCell=""></template>
+                  <template #toolBottom>
+                    <div class="super-search" v-show="superSearch" style="margin-top: 8px">
+                      <a-form :model="where" :labelCol="labelCol" :wrapper-col="wrapperCol">
+                        <a-row :gutter="16">
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="请求方式:">
+                              <a-select
+                                  v-model:value="where.httpMethod"
+                                  show-search
+                                  placeholder="请选择请求方式"
+                                  allow-clear
+                                  @change="reload"
+                                  autocomplete="off"
+                                  class="search-select"
+                              >
+                                <a-select-option value="POST">POST</a-select-option>
+                                <a-select-option value="GET">GET</a-select-option>
+                              </a-select>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="时间范围:">
+                              <a-range-picker v-model:value="dateRange" class="search-date" value-format="YYYY-MM-DD" @change="reload"/>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="客户端的ip:">
+                              <a-input
+                                  v-model:value="where.clientIp"
+                                  placeholder="客户端的ip"
+                                  class="search-date"
+                                  @pressEnter="reload"
+                              ></a-input>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label="当前用户请求的url:">
+                              <a-input
+                                  v-model:value="where.requestUrl"
+                                  placeholder="当前用户请求的url"
+                                  class="search-date"
+                                  @pressEnter="reload"
+                              ></a-input>
+                            </a-form-item>
+                          </a-col>
+                          <a-col v-bind="spanCol">
+                            <a-form-item label=" " class="not-label">
+                              <a-space :size="16">
+                                <a-button class="border-radius" @click="reload" type="primary">查询</a-button>
+                                <a-button class="border-radius" @click="clear">重置</a-button>
+                              </a-space>
+                            </a-form-item>
+                          </a-col>
+                        </a-row>
+                      </a-form>
+                    </div>
+                  </template>
                 </common-table>
               </div>
             </div>
@@ -110,26 +101,12 @@
         </div>
       </div>
     </div>
-
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
   </div>
 </template>
 
 <script setup name="SecurityLog">
-import { ref, onMounted, computed } from 'vue';
-import { isMobile } from '@/utils/common/util';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
-
-const props = defineProps({
-  isCollapse: Boolean
-});
+import {ref, onMounted, computed} from 'vue';
+import {isMobile} from '@/utils/common/util';
 
 // 表格配置
 const columns = ref([
@@ -156,14 +133,15 @@ const columns = ref([
   {
     title: '当前用户请求的url',
     dataIndex: 'requestUrl',
-    isShow: true,
-    width: 200
+    width: 200,
+    ellipsis: true
   },
   {
     dataIndex: 'logContent',
     title: '安全日志内容',
+    width: 400,
     isShow: true,
-    width: 400
+    ellipsis: true
   },
   {
     dataIndex: 'clientBrowser',
@@ -213,51 +191,30 @@ const where = ref({
   requestUrl: '',
   logContent: ''
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('SECURITY_LOG_TABLE');
 // 是否显示高级查询
-const isSuperSearch = ref(false);
+const superSearch = ref(false);
 
 const labelCol = computed(() => {
-  return { xxl: 10, xl: 10, lg: 5, md: 7, sm: 4 };
+  return {xxl: 10, xl: 10, lg: 5, md: 7, sm: 4};
 });
 
 const wrapperCol = computed(() => {
-  return { xxl: 14, xl: 14, lg: 19, md: 17, sm: 20 };
+  return {xxl: 14, xl: 14, lg: 19, md: 17, sm: 20};
 });
 
 const spanCol = computed(() => {
-  if (isMobile() || props.isCollapse) {
-    return { xxl: 6, xl: 8, lg: 12, md: 24, sm: 24, xs: 24 };
+  if (isMobile()) {
+    return {xxl: 6, xl: 8, lg: 12, md: 24, sm: 24, xs: 24};
   }
-  return { xxl: 6, xl: 8, lg: 24, md: 24, sm: 24, xs: 24 };
+  return {xxl: 6, xl: 8, lg: 24, md: 24, sm: 24, xs: 24};
 });
 
 onMounted(() => {
-  getColumnData();
 });
-
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
 
 // 切换高级查询
 const changeSuperSearch = () => {
-  isSuperSearch.value = !isSuperSearch.value;
-};
-
-// 更多点击
-const moreClick = ({ key }) => {
-  if (key == '1') {
-    isShowCustom.value = true;
-  }
+  superSearch.value = !superSearch.value;
 };
 
 // 点击搜索

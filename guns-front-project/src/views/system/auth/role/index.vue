@@ -8,17 +8,12 @@
               <div class="header-content">
                 <div class="header-content-left">
                   <a-space :size="16">
-                    <a-input
-                      v-model:value="where.searchText"
-                      placeholder="名称、编码（回车搜索）"
-                      @pressEnter="reload"
-                      class="search-input"
-                    >
-                      <template #prefix>
-                        <icon-font iconClass="icon-opt-search"></icon-font>
-                      </template>
-                    </a-input>
-                    <a-button class="border-radius" @click="clear">重置</a-button>
+                    <a-tabs v-model:activeKey="where.roleType" class="devops-tabs" @change="roleTypeChange">
+                      <a-tab-pane key="" tab="全部"> </a-tab-pane>
+                      <a-tab-pane :key="10" tab="系统角色"> </a-tab-pane>
+                      <a-tab-pane :key="15" tab="业务角色"> </a-tab-pane>
+                      <a-tab-pane :key="20" tab="公司角色"> </a-tab-pane>
+                    </a-tabs>
                   </a-space>
                 </div>
                 <div class="header-content-right">
@@ -29,12 +24,8 @@
                     <a-dropdown>
                       <template #overlay>
                         <a-menu @click="moreClick">
-                          <a-menu-item key="1">
-                            <icon-font iconClass="icon-opt-zidingyilie" color="#60666b"></icon-font>
-                            <span>自定义列</span>
-                          </a-menu-item>
                           <div v-permission="['EDIT_ROLE']">
-                            <a-menu-item key="2">
+                            <a-menu-item key="1">
                               <icon-font iconClass="icon-opt-shanchu" color="#60666b"></icon-font>
                               <span>批量删除</span>
                             </a-menu-item>
@@ -52,41 +43,80 @@
             </div>
             <div class="content-mian-body">
               <div class="table-content">
-                <common-table :columns="columns" :where="where" rowId="roleId" ref="tableRef" url="/sysRole/page">
-                  <template #bodyCell="{ column, record }">
-                    <!-- 姓名 -->
-                    <template v-if="column.dataIndex == 'roleName'">
-                      <a @click="openAddEdit(record)">{{ record.roleName }}</a>
-                    </template>
-                    <!-- 类型 -->
-                    <template v-if="column.dataIndex == 'roleType'">
-                      <span v-if="record.roleType == 10">系统角色</span>
-                      <span v-if="record.roleType == 15">业务角色</span>
-                      <span v-if="record.roleType == 20">公司角色</span>
-                    </template>
-                    <!-- 操作 -->
-                    <template v-if="column.key == 'action'">
-                      <a-space :size="16">
-                        <icon-font
-                          iconClass="icon-opt-bianji"
-                          font-size="24px"
-                          title="编辑"
-                          color="#60666b"
-                          v-permission="['DELETE_ROLE']"
-                          @click="openAddEdit(record)"
-                        ></icon-font>
-                        <icon-font
-                          iconClass="icon-opt-shanchu"
-                          font-size="24px"
-                          title="删除"
-                          color="#60666b"
-                          v-permission="['EDIT_ROLE']"
-                          @click="remove(record)"
-                        ></icon-font>
-                      </a-space>
-                    </template>
+                <guns-split-layout
+                  :width="['', 10].includes(where.roleType) ? '0px' : '292px'"
+                  :allowCollapse="['', 10].includes(where.roleType) ? false : true"
+                  :resizable="['', 10].includes(where.roleType) ? false : true"
+                >
+                  <RoleTree
+                    v-if="[15, 20].includes(where.roleType)"
+                    :roleType="where.roleType"
+                    @treeSelect="treeSelect"
+                    @delRoleType="delRoleType"
+                    @getCompanyData="getCompanyData"
+                  />
+                  <template #content>
+                    <div :class="['role-table', { 'no-radius': [15, 20].includes(where.roleType) }]">
+                      <common-table
+                        :columns="columns"
+                        :where="where"
+                        :showToolTotal="false"
+                        showTableTool
+                        rowId="roleId"
+                        ref="tableRef"
+                        url="/sysRole/page"
+                        fieldBusinessCode="ROLE_TABLE"
+                      >
+                        <template #toolLeft>
+                          <a-input
+                            v-model:value="where.searchText"
+                            placeholder="名称、编码（回车搜索）"
+                            @pressEnter="reload"
+                            class="search-input"
+                            :bordered="false"
+                          >
+                            <template #prefix>
+                              <icon-font iconClass="icon-opt-search"></icon-font>
+                            </template>
+                          </a-input>
+                        </template>
+                        <template #bodyCell="{ column, record }">
+                          <!-- 姓名 -->
+                          <template v-if="column.dataIndex == 'roleName'">
+                            <a @click="openAddEdit(record)">{{ record.roleName }}</a>
+                          </template>
+                          <!-- 类型 -->
+                          <template v-if="column.dataIndex == 'roleType'">
+                            <span v-if="record.roleType == 10">系统角色</span>
+                            <span v-if="record.roleType == 15">业务角色</span>
+                            <span v-if="record.roleType == 20">公司角色</span>
+                          </template>
+                          <!-- 操作 -->
+                          <template v-if="column.key == 'action'">
+                            <a-space :size="16">
+                              <icon-font
+                                iconClass="icon-opt-bianji"
+                                font-size="24px"
+                                title="编辑"
+                                color="#60666b"
+                                v-permission="['DELETE_ROLE']"
+                                @click="openAddEdit(record)"
+                              ></icon-font>
+                              <icon-font
+                                iconClass="icon-opt-shanchu"
+                                font-size="24px"
+                                title="删除"
+                                color="#60666b"
+                                v-permission="['EDIT_ROLE']"
+                                @click="remove(record)"
+                              ></icon-font>
+                            </a-space>
+                          </template>
+                        </template>
+                      </common-table>
+                    </div>
                   </template>
-                </common-table>
+                </guns-split-layout>
               </div>
             </div>
           </div>
@@ -94,31 +124,31 @@
       </div>
     </div>
 
-    <!-- 自定义列 -->
-    <Custom
-      v-model:visible="isShowCustom"
-      v-if="isShowCustom"
-      :data="columns"
-      @done="val => (columns = val)"
-      :fieldBusinessCode="fieldBusinessCode"
-    />
-
     <!-- 新增编辑弹框 -->
-    <RoleAddEdit v-model:visible="showEdit" v-if="showEdit" :data="current" @done="reload" />
+    <RoleAddEdit
+      v-model:visible="showEdit"
+      v-if="showEdit"
+      :roleType="where.roleType"
+      :roleCategoryId="where.roleCategoryId"
+      :data="current"
+      @done="reload"
+      :companyData="companyData"
+    />
   </div>
 </template>
 
 <script setup name="AuthRole">
 import { RoleApi } from './api/RoleApi';
-import { ref, createVNode, onMounted } from 'vue';
+import { ref, createVNode, onMounted, defineAsyncComponent } from 'vue';
 import { message, Modal } from 'ant-design-vue/es';
 import RoleAddEdit from './components/role-add-edit.vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
-import { CustomApi } from '@/components/common/Custom/api/CustomApi';
+
+const RoleTree = defineAsyncComponent(() => import('./components/role-tree.vue'));
 
 defineOptions({
-  name: 'AuthRole',
-})
+  name: 'AuthRole'
+});
 
 // 表格配置
 const columns = ref([
@@ -179,36 +209,44 @@ const tableRef = ref(null);
 
 // 搜索条件
 const where = ref({
-  searchText: ''
+  searchText: '',
+  roleType: '',
+  roleCategoryId: undefined
 });
-// 是否显示自定义列
-const isShowCustom = ref(false);
 // 当前行数据
 const current = ref(null);
 // 是否显示新增编辑弹框
 const showEdit = ref(false);
-// 业务标识的编码
-const fieldBusinessCode = ref('ROLE_TABLE');
 
-onMounted(() => {
-  getColumnData();
-});
+const companyData = ref(null);
 
-// 获取表格配置
-const getColumnData = () => {
-  CustomApi.getUserConfig({ fieldBusinessCode: fieldBusinessCode.value }).then(res => {
-    if (res.tableWidthJson) {
-      columns.value = JSON.parse(res.tableWidthJson);
-    }
-  });
-};
+onMounted(() => {});
 
 // 更多点击
 const moreClick = ({ key }) => {
   if (key == '1') {
-    isShowCustom.value = true;
-  } else if (key == '2') {
     batchDelete();
+  }
+};
+
+const treeSelect = node => {
+  where.value.roleCategoryId = node.id;
+  reload();
+};
+
+const getCompanyData = data => {
+  if (where.value.roleType == 20) {
+    companyData.value = data;
+    where.value.roleCompanyId = data?.companyId;
+    reload();
+  }
+};
+
+// 删除分类
+const delRoleType = node => {
+  if (where.value.roleCategoryId == node.id) {
+    where.value.roleCategoryId = undefined;
+    reload();
   }
 };
 
@@ -217,10 +255,10 @@ const reload = () => {
   tableRef.value.reload();
 };
 
-// 清除搜索条件
-const clear = () => {
-  where.value.searchText = '';
-  reload();
+const roleTypeChange = () => {
+  where.value.roleCategoryId = undefined;
+  where.value.roleCompanyId = undefined;
+  if (where.value.roleType != 20) reload();
 };
 
 // 新增编辑点击
@@ -263,4 +301,14 @@ const batchDelete = () => {
 };
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.role-table {
+  width: 100%;
+  height: 100%;
+}
+:deep(.no-radius) {
+  .table-tool {
+    border-top-left-radius: 0px;
+  }
+}
+</style>
