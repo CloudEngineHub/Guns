@@ -53,7 +53,9 @@ export const useSystemStore = defineStore({
         if (this.gunsMgrLogo != null) {
           resolve(Object.assign({}, this.$state));
         } else {
-          ThemeApi.getCurrentThemeInfo().then(result => {
+          ThemeApi.getCurrentThemeInfo().then(res => {
+            let result = res;
+            result.gunsSubTitle = result.otherConfigs?.gunsSubTitle;
             this.gunsMgrLogo = result.gunsMgrLogo;
             this.gunsMgrName = result.gunsMgrName;
             this.gunsSubTitle = result.otherConfigs?.gunsSubTitle;

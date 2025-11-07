@@ -10,14 +10,16 @@
         <h4 class="login-subtitle" v-if="isMinWidth">{{ themeInfo.gunsSubTitle }}</h4>
       </div>
       <div class="login-body">
-        <h4 style="font-size: 32px; margin-bottom: 32px; font-weight: bold">{{ t('login.title') }}</h4>
-        <a-radio-group v-model:value="tabActive" size="default" class="radio-group" v-show="false">
-          <a-radio-button value="1">密码登录</a-radio-button>
-        </a-radio-group>
+        <div class="login-body-header">
+          <h4 style="font-size: 32px; font-weight: bold">{{ t('login.title') }}</h4>
+          <a-radio-group v-model:value="tabActive" size="default" class="radio-group" v-show="false">
+            <a-radio-button value="1">密码登录</a-radio-button>
+          </a-radio-group>
+        </div>
         <!-- 登录 -->
-        <a-form class="login-form">
+        <a-form class="login-form" layout="vertical">
           <!-- 密码登录 -->
-          <a-form-item v-bind="validateInfos.account">
+          <a-form-item v-bind="validateInfos.account" label="账号">
             <a-input
               allow-clear
               size="large"
@@ -26,29 +28,36 @@
               :placeholder="t('login.username')"
               class="border-radius"
             >
-              <template #prefix>
-                <user-outlined />
-              </template>
             </a-input>
           </a-form-item>
-          <a-form-item v-bind="validateInfos.password">
+          <a-form-item v-bind="validateInfos.password" label="密码" style="position: relative">
             <a-input-password
               @keydown.enter="logoClick"
               size="large"
               v-model:value="form.password"
               :placeholder="t('login.password')"
               class="border-radius"
+              autocomplete="new-password"
             >
-              <template #prefix>
-                <lock-outlined />
-              </template>
             </a-input-password>
           </a-form-item>
-          <a-form-item>
-            <div class="register">
-              <a-checkbox v-model:checked="form.rememberMe"> 7天免登陆 </a-checkbox>
+          <a-form-item v-bind="validateInfos.verCode" v-if="captchaFlag" label="验证码">
+            <div class="login-input-group">
+              <a-input allow-clear size="large" v-model:value="form.verCode" :placeholder="t('login.code')" class="border-radius">
+                <template #prefix>
+                  <safety-certificate-outlined style="color: #00000073" />
+                </template>
+              </a-input>
+              <a-button class="login-captcha" @click="changeCaptcha">
+                <img v-if="captcha" :src="captcha" alt="" />
+              </a-button>
             </div>
           </a-form-item>
+          <div>
+            <span class="rememberMe">
+              <a-checkbox v-model:checked="form.rememberMe"> 7天免登陆 </a-checkbox>
+            </span>
+          </div>
           <a-form-item>
             <a-button
               block
@@ -61,18 +70,6 @@
             >
               {{ loading ? t('login.loading') : t('login.login') }}
             </a-button>
-          </a-form-item>
-          <a-form-item v-bind="validateInfos.verCode" v-if="captchaFlag">
-            <div class="login-input-group">
-              <a-input allow-clear size="large" v-model:value="form.verCode" :placeholder="t('login.code')" class="border-radius">
-                <template #prefix>
-                  <safety-certificate-outlined />
-                </template>
-              </a-input>
-              <a-button class="login-captcha" @click="changeCaptcha">
-                <img v-if="captcha" :src="captcha" alt="" />
-              </a-button>
-            </div>
           </a-form-item>
         </a-form>
       </div>
@@ -143,6 +140,8 @@ const form = reactive({
   password: '',
   verKey: '',
   verCode: '',
+  dragVerKey: '',
+  dragVerCode: '',
   rememberMe: false
 });
 // 租户注册数据
@@ -263,6 +262,7 @@ const submit = () => {
       })
       .catch(e => {
         loading.value = false;
+        changeCaptcha();
       })
       .finally(() => {});
   }
@@ -279,6 +279,7 @@ const submit = () => {
       })
       .catch(e => {
         loading.value = false;
+        changeCaptcha();
       })
       .finally(() => {});
   }
@@ -286,6 +287,7 @@ const submit = () => {
 
 /* 获取图形验证码 */
 const changeCaptcha = () => {
+  if (!CAPTCHA_FLAG) return;
   // 这里演示的验证码是后端返回base64格式的形式, 如果后端地址直接是图片请参考忘记密码页面
   LoginApi.getCaptcha()
     .then(response => {
@@ -301,19 +303,19 @@ const changeCaptcha = () => {
 
 const closeVertify = () => {
   loading.value = true;
-}
+};
 
 if (getToken()) {
   goHome();
 } else {
-  // changeCaptcha();
+  changeCaptcha();
 }
 </script>
 
 <style lang="less">
 body {
   /*自定义背景图片*/
-  --customBackground: url('@/assets/bg-login1.png');
+  --customBackground: url('@/assets/bg-login.png');
 }
 </style>
 
@@ -334,7 +336,7 @@ body {
 
 .login-info {
   position: absolute;
-  top: 8%;
+  top: 12%;
   left: 6%;
 }
 
@@ -365,7 +367,7 @@ body {
 
 // 标题
 .login-title {
-  color: rgba(255, 255, 255, 1);
+  color: #1b2c45;
   font-size: 52px;
   margin: 0 0 6px 0;
   font-weight: normal;
@@ -374,7 +376,7 @@ body {
 }
 
 .login-subtitle {
-  color: rgba(255, 255, 255, 1);
+  color: #1b2c45;
   font-size: 32px;
   margin: 0;
   font-weight: normal;
@@ -391,7 +393,33 @@ body {
   box-sizing: border-box;
   border-radius: 8px;
   margin: 10px;
-  box-shadow: -6px 6px 10px 0px rgba(51, 65, 86, 0.15);
+  box-shadow: 0px 0px 10px 0px #33415626;
+}
+
+.login-body-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+:deep(.ant-form-item-required) {
+  color: #60666b;
+  font-size: 16px;
+}
+
+:deep(.ant-form-item-label > label.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before) {
+  display: none;
+}
+
+:deep(.ant-input-affix-wrapper) {
+  border-width: 1.5px;
+  border-color: #cacdd3;
+  border-radius: 8px;
+}
+
+:deep(.ant-btn-text:hover) {
+  background: #fff;
 }
 
 .login-form {
@@ -401,8 +429,33 @@ body {
   justify-content: center;
 }
 
+.find-pwd {
+  position: absolute;
+  right: 0;
+  bottom: -25px;
+  color: #898e91;
+  cursor: pointer;
+}
+
+.rememberMe {
+  color: #898e91;
+  cursor: pointer;
+}
+
+:deep(.ant-checkbox-wrapper) {
+  color: #898e91;
+}
+
 :deep(.ant-input) {
   font-size: 14px !important;
+}
+
+:deep(.ant-input-affix-wrapper:not(.ant-input-affix-wrapper-disabled):hover) {
+  border-color: #cacdd3;
+}
+
+:deep(.ant-input-affix-wrapper-focused) {
+  box-shadow: 0 0 0 0 #fff !important;
 }
 
 .radio-group {
@@ -515,7 +568,13 @@ html.dark .login-wrapper {
   width: 130px;
   height: 40px;
   font-size: 14px;
-  border-radius: 5px;
-  padding: 0;
+  border-radius: 8px;
+  margin-left: 8px;
+  padding: 0 4px !important;
+  border: 1.5px solid #cacdd3;
+
+  img {
+    width: 100%;
+  }
 }
 </style>

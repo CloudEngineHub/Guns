@@ -49,6 +49,8 @@
                       url="/sysConfig/page"
                       showTableTool
                       :showToolTotal="false"
+                      :loading="loading"
+                      :pageSize="50"
                       fieldBusinessCode="SYS_CONFIG_TABLE"
                     >
                       <template #toolLeft>
@@ -65,11 +67,31 @@
                         </a-input>
                       </template>
                       <template #bodyCell="{ column, record }">
-                        <template v-if="column.dataIndex == 'configName'">
+                        <template v-if="column?.dataIndex == 'configName'">
                           <a @click="openAddEdit(record)">{{ record.configName }}</a>
                         </template>
+                        <template v-if="column?.dataIndex == 'configValue'">
+                          <template v-if="record.configCode == 'SYS_FILE_SAVE_TYPE'">
+                            <a-radio-group v-model:value="record.configValue" @change="configValueBlur(record)">
+                              <a-radio :style="radioStyle" :value="item.key" v-for="item in fileSaveTypeList">{{ item.name }}</a-radio>
+                            </a-radio-group>
+                          </template>
+                          <template v-else-if="record.configValue == 'false' || record.configValue == 'true'">
+                            <a-radio-group v-model:value="record.configValue" @change="configValueBlur(record)">
+                              <a-radio value="true">是</a-radio>
+                              <a-radio value="false">否</a-radio>
+                            </a-radio-group>
+                          </template>
+                          <a-textarea
+                            v-else
+                            v-model:value="record.configValue"
+                            autosize
+                            placeholder="请输入"
+                            @blur="configValueBlur(record)"
+                          ></a-textarea>
+                        </template>
                         <!-- 配置类型 -->
-                        <template v-if="column.dataIndex == 'sysFlag'">
+                        <template v-if="column?.dataIndex == 'sysFlag'">
                           <a-tag color="green" v-if="record.sysFlag == 'Y'">是</a-tag>
                           <a-tag color="red" v-if="record.sysFlag == 'N'">否</a-tag>
                         </template>
@@ -110,7 +132,7 @@
 
 <script setup name="SysConfig">
 import { SysConfigApi } from './api/SysConfigApi';
-import { ref, createVNode, onMounted } from 'vue';
+import { ref, createVNode, onMounted, reactive } from 'vue';
 import { message, Modal } from 'ant-design-vue/es';
 import ConfigType from './components/config-type/config-type.vue';
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue';
@@ -123,39 +145,31 @@ defineOptions({
 // 表格配置
 const columns = ref([
   {
-    key: 'index',
-    title: '序号',
-    width: 60,
-    align: 'center',
-    isShow: true,
-    hideInSetting: true
-  },
-  {
     dataIndex: 'configName',
     title: '配置名称',
     ellipsis: true,
-    width: 100,
+    width: 300,
     isShow: true
   },
-  {
-    dataIndex: 'configCode',
-    title: '配置编码',
-    width: 100,
-    isShow: true
-  },
+  // {
+  //   dataIndex: 'configCode',
+  //   title: '配置编码',
+  //   width: 100,
+  //   isShow: true
+  // },
   {
     dataIndex: 'configValue',
     title: '属性值',
     ellipsis: true,
-    width: 100,
+    // width: 100,
     isShow: true
   },
-  {
-    dataIndex: 'sysFlag',
-    title: '系统类型',
-    width: 100,
-    isShow: true
-  },
+  // {
+  //   dataIndex: 'sysFlag',
+  //   title: '系统类型',
+  //   width: 100,
+  //   isShow: true
+  // },
   {
     key: 'action',
     title: '操作',
@@ -175,6 +189,41 @@ const where = ref({
 const current = ref(null);
 // 是否显示新增编辑弹框
 const showEdit = ref(false);
+
+const loading = ref(false);
+
+const fileSaveTypeList = ref([
+  {
+    key: '10',
+    name: '本地，存储到默认路径（jar所在目录）'
+  },
+  {
+    key: '11',
+    name: '本地，存储到指定路径下（需要配置linux和windows的路径）'
+  },
+  {
+    key: '20',
+    name: '存储到MinIO'
+  },
+  {
+    key: '30',
+    name: '存储到阿里云'
+  },
+  {
+    key: '40',
+    name: '存储到腾讯云'
+  },
+  {
+    key: '50',
+    name: '存储到青云'
+  }
+]);
+
+const radioStyle = reactive({
+  display: 'flex',
+  height: '30px',
+  lineHeight: '30px'
+});
 
 onMounted(() => {});
 
@@ -239,6 +288,16 @@ const batchDelete = () => {
       reload();
     }
   });
+};
+
+// 属性值失去焦点
+const configValueBlur = record => {
+  loading.value = true;
+  SysConfigApi.edit(record)
+    .then(res => {
+      message.success(res.message);
+    })
+    .finally(() => (loading.value = false));
 };
 </script>
 

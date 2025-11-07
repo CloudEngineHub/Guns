@@ -36,6 +36,7 @@ const isUpdate = ref(false);
 // 表单数据
 const form = ref({
   sysFlag: 'Y',
+  fldSort: 100,
   groupCode: props.groupCode
 });
 // ref

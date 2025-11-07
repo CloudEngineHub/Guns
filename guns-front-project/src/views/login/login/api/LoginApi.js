@@ -68,6 +68,6 @@ export class LoginApi {
    * @date 2021/4/1 14:45
    */
   static async getCaptcha(params) {
-    return await Request.get('/captcha', params);
+    return await Request.get('/getImageCaptcha', params);
   }
 }

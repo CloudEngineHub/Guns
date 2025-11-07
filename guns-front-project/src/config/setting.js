@@ -1,6 +1,9 @@
 // 是否使用验证码
 export const CAPTCHA_FLAG = false;
 
+// 是否使用拖拽图形验证码
+export const DRAW_CAPTCHA_FLAG = false;
+
 // 是否开启单点登录
 export const SSO_FLAG = false;
 
@@ -12,9 +15,6 @@ export const SHOW_THEME = true;
 
 // 是否显示修改多语言
 export const SHOW_I18n = true;
-
-//  是否使用图形验证码
-export const DRAW_CAPTCHA_FLAG = false;
 
 // 是否开启自定义登录背景
 export const CUSTOM_LOGIN_BACKGROUND_ENABLE = false;

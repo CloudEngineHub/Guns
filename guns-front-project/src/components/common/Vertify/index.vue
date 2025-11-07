@@ -46,6 +46,12 @@
 
             <!-- canvas 验证图形 -->
             <div class="ym-captcha-modal-info">
+              <img
+                :src="vertifySrc"
+                alt=""
+                class="base-img"
+                :style="{ width: `${params.size.width}px`, height: `${params.size.height}px` }"
+              />
               <canvas :width="params.size.width" :height="params.size.height" ref="imageRef"></canvas>
               <canvas :width="params.size.width" :height="params.size.height" ref="blockRef"></canvas>
             </div>
@@ -103,6 +109,11 @@ import { RsaEncry } from '@/utils/common/util';
 import { setToken } from '@/utils/token-util';
 import { SsoUtil } from '@/utils/common/sso-util';
 import { cleanPageTabs } from '@/utils/page-tab-util';
+import Vertify1 from './images/vertify1.png';
+import Vertify2 from './images/vertify2.png';
+import Vertify3 from './images/vertify3.png';
+import Vertify4 from './images/vertify4.png';
+import Vertify5 from './images/vertify5.png';
 
 const props = defineProps({
   visible: Boolean,
@@ -240,28 +251,61 @@ const dragFlag = ref(false);
 // 后台图形数据
 const vertifyData = ref({});
 
+const vertifySrc = ref(null);
+
 onMounted(() => {
   getVertifyData(true);
 });
 
 // 获取后端验证码图形
 const getVertifyData = (isInit = false) => {
+  getVertifySrc();
   VertifyApi.getDragCaptcha().then(res => {
     vertifyData.value = res.data;
     params._background = 'data:image/jpeg;base64,' + res.data.srcImage;
     if (isInit) {
       init();
     } else {
-      params.loading = true;
-      setCheckData();
-      params.drag.moving = false;
-      const block = blockRef.value;
-      block.width = params.size.width;
-      params.ctx.image.clearRect(0, 0, params.size.width, params.size.height);
-      params.ctx.block.clearRect(0, 0, params.size.width, params.size.height);
-      initImageElem();
+      resetDrag();
+      redrawPicture();
     }
   });
+};
+
+// 把背景图+滑块图一次性重画（刷新时用）
+const redrawPicture = () => {
+  // 1. 先清空两块画布
+  params.ctx.image?.clearRect(0, 0, params.size.width, params.size.height);
+  params.ctx.block?.clearRect(0, 0, params.size.width, params.size.height);
+
+  // 2. 重新拉两张图（已经存好的 base64）
+  const bgImg = new Image();
+  const blockImg = new Image();
+  bgImg.src = params._background;
+  blockImg.src = 'data:image/jpeg;base64,' + vertifyData.value.cutImage;
+
+  // 3. 背景图画上去
+  bgImg.onload = () => {
+    params.ctx.image.drawImage(bgImg, 0, 0, params.size.width, params.size.height);
+  };
+
+  // 4. 滑块图画上去
+  blockImg.onload = () => {
+    params.ctx.block.drawImage(blockImg, 0, 0, 50, 50);
+    blockRef.value.style.top = vertifyData.value.locationY + 'px';
+  };
+};
+
+const getVertifySrc = () => {
+  const num = Math.floor(Math.random() * 5) + 1;
+  switch (num) {
+    case 1: vertifySrc.value = Vertify1; break;
+    case 2: vertifySrc.value = Vertify2; break;
+    case 3: vertifySrc.value = Vertify3; break;
+    case 4: vertifySrc.value = Vertify4; break;
+    case 5: vertifySrc.value = Vertify5; break;
+    default: vertifySrc.value = Vertify1;
+  }
 };
 
 const init = () => {
@@ -329,37 +373,7 @@ const setCheckData = () => {
 
 // 初始化图例
 const initImageElem = () => {
-  const elem = new Image();
-  const elem1 = new Image();
-  elem.src = params._background;
-  elem1.src = 'data:image/jpeg;base64,' + vertifyData.value.cutImage;
-  elem.onload = () => initImage(elem, 'image');
-  elem1.onload = () => initImage(elem1, 'block');
-};
-
-// 初始化图片
-const initImage = (elem, type) => {
-  if (type == 'image') {
-    if (params.ctx.image) {
-      /** image */
-      params.ctx.image.drawImage(elem, 0, 0, params.size.width, params.size.height);
-      /** text */
-      params.ctx.image.beginPath();
-      params.ctx.image.fillStyle = '#FFF';
-      params.ctx.image.shadowColor = 'transparent';
-      params.ctx.image.shadowBlur = 0;
-      params.ctx.image.font = 'bold 24px MicrosoftYaHei';
-      params.ctx.image.fillText('拖动滑块拼合图片', 12, 30);
-      params.ctx.image.font = '16px MicrosoftYaHei';
-      params.ctx.image.fillText('就能验证成功哦', 12, 55);
-      params.ctx.image.closePath();
-    }
-  } else {
-    if (params.ctx.block) {
-      params.ctx.block.drawImage(elem, 0, 0, 50, 50);
-      blockRef.value.style.top = vertifyData.value.locationY + 'px';
-    }
-  }
+  redrawPicture();
   params.loading = false;
 };
 
@@ -412,6 +426,7 @@ const dragMouseup = e => {
 };
 
 const dragStart = evt => {
+  if (params.check.being) return 
   const x = evt.clientX || evt.touches[0].clientX;
   const sliderRect = getBoundingClientRect(sliderRef.value);
   const sliderBtnRect = getBoundingClientRect(sliderBtnRef.value);
@@ -446,8 +461,8 @@ const checkVerificationCode = async () => {
   if (params.check.being) return;
   params.check.being = true;
   let data = {
-    verKey: vertifyData.value.key,
-    verCode: coordinateX
+    dragVerKey: vertifyData.value.key,
+    dragVerCode: coordinateX
   };
   submit(data);
 };
@@ -477,7 +492,6 @@ const submit = data => {
         })
         .catch(e => {
           getVertifyData();
-          dragReset();
           loading.value = false;
         })
         .finally(() => {});
@@ -498,7 +512,6 @@ const submit = data => {
         })
         .catch(e => {
           getVertifyData();
-          dragReset();
           loading.value = false;
         })
         .finally(() => {});
@@ -512,6 +525,21 @@ const dragReset = () => {
   params.drag.originX = 0;
   params.drag.originY = 0;
 };
+
+// 把拖拽相关所有状态一次性归位
+const resetDrag = () => {
+  // 1. 滑块/图块位置归零
+  dragReset()
+
+  // 2. 状态标志全部复位
+  params.drag.moving = false
+  params.check.being = false
+  params.check.correct = false
+  params.check.value = null
+  params.time.start = null
+  params.time.end = null
+  dragFlag.value = false
+}
 
 // 关闭弹框
 const closeModal = (type, data) => {

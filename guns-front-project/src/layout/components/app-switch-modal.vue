@@ -76,7 +76,9 @@ const changeApp = item => {
         window.open(href, '_blank');
       } else {
         if (isExternalLink(path.value)) {
-          const href = path.value;
+          const { href } = router.resolve({
+            path: path.value
+          });
           window.open(href, '_blank');
         } else {
           router.push(path.value);
