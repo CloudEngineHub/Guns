@@ -11,6 +11,7 @@
     :side-style="sideStyle"
     :layout-style="layoutStyle"
     :side-menu-style="sideMenuStyle"
+    :application-style="applicationStyle"
     :tab-style="tabStyle"
     :fixed-body="fixedBody"
     :body-full="bodyFull"
@@ -60,7 +61,7 @@
     </template>
     <!-- 顶栏右侧区域 -->
     <template #right="rightProp">
-      <header-tools :is-mobile="rightProp.isMobile" :sideMenuStyle="sideMenuStyle"/>
+      <header-tools :is-mobile="rightProp.isMobile" :applicationStyle="applicationStyle"/>
     </template>
     <!-- 全局页脚 -->
     <template #footer>
@@ -155,7 +156,8 @@ const {
   bodyFull,
   logoAutoSize,
   sideUniqueOpen,
-  sideInitOpenAll
+  sideInitOpenAll,
+  applicationStyle
 } = storeToRefs(themeStore);
 
 // 当前菜单数据

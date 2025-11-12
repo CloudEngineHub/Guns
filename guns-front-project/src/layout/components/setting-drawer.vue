@@ -52,37 +52,84 @@
         />
       </div>
       <a-divider />
+      <!-- 应用配置 -->
+      <div class="guns-setting-title guns-text-secondary hidden-xs-only">
+        {{ t('layout.setting.applicationLocation') }}
+      </div>
+      <a-row :gutter="[16, 16]" class="guns-new-setting">
+        <a-col :span="12">
+          <div class="guns-new-setting-theme" @click="updateApplicationStyle('top')">
+            <div class="guns-new-setting-img" :class="appActive('top')">
+              <AppTopNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.applicationLocationStyles.top') }}
+            </div>
+          </div>
+        </a-col>
+        <a-col :span="12">
+          <div class="guns-new-setting-theme" @click="updateApplicationStyle('default')">
+            <div class="guns-new-setting-img" :class="appActive('default')">
+              <AppSiderNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.applicationLocationStyles.side') }}
+            </div>
+          </div>
+        </a-col>
+      </a-row>
+      <a-divider class="hidden-xs-only" />
       <!-- 导航布局 -->
       <div class="guns-setting-title guns-text-secondary hidden-xs-only">
         {{ t('layout.setting.layoutStyle') }}
       </div>
-      <div class="guns-setting-theme guns-text-primary hidden-xs-only">
-        <a-tooltip :title="t('layout.setting.layoutStyles.side')">
-          <div class="guns-bg-base guns-side-dark" @click="updateLayoutStyle('side')">
-            <check-outlined v-if="layoutStyle === 'side'" />
+      <a-row :gutter="[16, 16]" class="guns-new-setting">
+        <a-col :span="12">
+          <div class="guns-new-setting-theme" @click="updateLayoutStyle('side')">
+            <div class="guns-new-setting-img" :class="navActive('side')">
+              <SidebarNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.layoutStyles.side') }}
+            </div>
           </div>
-        </a-tooltip>
-        <a-tooltip :title="t('layout.setting.layoutStyles.top')">
-          <div class="guns-bg-base guns-head-dark guns-layout-top" @click="updateLayoutStyle('top')">
-            <check-outlined v-if="layoutStyle === 'top'" />
+        </a-col>
+        <a-col :span="12">
+          <div class="guns-new-setting-theme" @click="updateSideMenuStyle">
+            <div class="guns-new-setting-img" :class="navActive('side', 'double')">
+              <SidebarMixedNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.layoutStyles.leftDouble') }}
+            </div>
           </div>
-        </a-tooltip>
-        <a-tooltip :title="t('layout.setting.layoutStyles.mix')">
-          <div class="guns-bg-base guns-layout-mix" @click="updateLayoutStyle('mix')">
-            <check-outlined v-if="layoutStyle === 'mix'" />
+        </a-col>
+        <a-col :span="12" v-if="applicationStyle == 'default'">
+          <div class="guns-new-setting-theme" @click="updateLayoutStyle('top')">
+            <div class="guns-new-setting-img" :class="navActive('top')">
+              <HeaderNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.layoutStyles.top') }}
+            </div>
           </div>
-        </a-tooltip>
-      </div>
-      <a-divider class="hidden-xs-only" />
-      <!-- 侧栏菜单布局 -->
-      <div v-if="layoutStyle == 'side'" :class="['guns-setting-item', { 'hidden-xs-only': styleResponsive }]">
-        <div class="setting-item-title">
-          {{ t('layout.setting.sideMenuStyle') }}
-        </div>
-        <div class="setting-item-control">
-          <a-switch size="small" :checked="sideMenuStyle === 'mix'" @change="updateSideMenuStyle" />
-        </div>
-      </div>
+        </a-col>
+        <a-col :span="12" v-if="applicationStyle == 'default'">
+          <div class="guns-new-setting-theme" @click="updateLayoutStyle('mix')">
+            <div class="guns-new-setting-img" :class="navActive('mix')">
+              <HeaderMixedNav />
+            </div>
+            <div class="guns-new-setting-title">
+              {{ t('layout.setting.layoutStyles.mix') }}
+
+              <a-tooltip :title="t('layout.setting.layoutStyles.tool')">
+                <question-circle-outlined />
+              </a-tooltip>
+            </div>
+          </div>
+        </a-col>
+      </a-row>
+
       <a-divider class="hidden-xs-only" />
       <div class="guns-setting-title guns-text-secondary">
         {{ t('layout.setting.other') }}
@@ -169,6 +216,7 @@ import { message } from 'ant-design-vue/es';
 import { CheckOutlined, SoundOutlined } from '@ant-design/icons-vue';
 import { messageLoading } from '@/components/layout/util';
 import { useThemeStore } from '@/store/modules/theme';
+import { HeaderMixedNav, HeaderNav, SidebarMixedNav, SidebarNav, AppTopNav, AppSiderNav } from '../icons';
 
 defineProps({
   // drawer 是否显示, v-model
@@ -191,8 +239,8 @@ const {
   color,
   sideUniqueOpen,
   sideInitOpenAll,
-  styleResponsive,
-  sideMenuStyle
+  sideMenuStyle,
+  applicationStyle
 } = storeToRefs(themeStore);
 
 // 主题列表
@@ -233,6 +281,23 @@ const predefineColors = ref(['#f5222d', '#fa541c', '#fa8c16', '#faad14', '#a0d91
 // 颜色选择器选中颜色
 const colorValue = ref(void 0);
 
+const navActive = (theme, type = '') => {
+  if (layoutStyle.value == theme && theme == 'side') {
+    if (sideMenuStyle.value == 'mix' && type == 'double') {
+      return ['guns-new-setting-img-active'];
+    } else if (!type && sideMenuStyle.value == 'default') {
+      return ['guns-new-setting-img-active'];
+    }
+    return [];
+  } else {
+    return theme === layoutStyle.value ? ['guns-new-setting-img-active'] : [];
+  }
+};
+
+const appActive = (theme) => {
+  return theme === applicationStyle.value ? ['guns-new-setting-img-active'] : [];
+}
+
 const updateVisible = value => {
   emit('update:visible', value);
 };
@@ -240,6 +305,14 @@ const updateVisible = value => {
 const updateShowTabs = value => {
   themeStore.setShowTabs(value);
 };
+
+const updateApplicationStyle = value => {
+  themeStore.setApplicationStyle(value);
+
+  if (value == 'top' && (layoutStyle.value == 'top' || layoutStyle.value == 'mix')) {
+     themeStore.setLayoutStyle('side');
+  }
+}
 
 const updateShowFooter = value => {
   themeStore.setShowFooter(value);
@@ -251,14 +324,16 @@ const updateSideStyle = value => {
 
 const updateLayoutStyle = value => {
   themeStore.setLayoutStyle(value);
+  themeStore.setSideMenuStyle('default');
 
-  if (value == 'mix') {
-    updateSideMenuStyle(false);
+  if (value == 'top' || value == 'mix') {
+    updateApplicationStyle('default');
   }
 };
 
-const updateSideMenuStyle = value => {
-  themeStore.setSideMenuStyle(value ? 'mix' : 'default');
+const updateSideMenuStyle = () => {
+  themeStore.setLayoutStyle('side');
+  themeStore.setSideMenuStyle('mix');
 };
 
 const updateTabStyle = value => {
@@ -321,6 +396,56 @@ initColorValue();
   .guns-setting-title {
     font-size: 13px;
     margin-bottom: 15px;
+  }
+
+  .guns-new-setting {
+    margin-bottom: 20px;
+
+    .guns-new-setting-theme {
+      width: 100px;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+
+      .guns-new-setting-img {
+        outline-style: solid;
+        outline-width: 1px;
+        outline-color: hsl(240 5.9% 90%);
+        position: relative;
+        cursor: pointer;
+        border-radius: calc(0.5rem - 2px);
+        padding: 0.25rem;
+
+        &:hover {
+          outline-style: solid;
+          outline-width: 2px;
+          outline-color: var(--primary-color);
+        }
+
+        .custom-radio-image {
+          width: 100%;
+          height: 70px;
+        }
+      }
+
+      .guns-new-setting-img-active {
+        outline-style: solid;
+        outline-width: 2px;
+        outline-color: var(--primary-color);
+      }
+
+      .guns-new-setting-title {
+        color: hsl(240 3.8% 46.1%);
+        font-size: 0.75rem;
+        line-height: 1rem;
+        text-align: center;
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+    }
   }
 
   /* 主题风格 */

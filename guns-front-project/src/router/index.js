@@ -115,7 +115,6 @@ router.beforeEach(async (to, from) => {
           d.path = d.redirect;
         }
       });
-      console.log(menus);
       userStore.setMenus(menus);
     }
   }

@@ -70,6 +70,14 @@ export default {
       return ['side', 'top', 'mix'].includes(value);
     }
   },
+  // 应用配置, default | top
+  applicationStyle: {
+    type: String,
+    default: 'default',
+    validator: value => {
+      return ['default', 'top'].includes(value);
+    }
+  },
   // 侧栏菜单模式, default | mix
   sideMenuStyle: {
     type: String,

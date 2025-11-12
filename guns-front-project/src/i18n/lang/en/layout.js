@@ -29,9 +29,11 @@ export default {
       primary: 'Primary Header'
     },
     layoutStyles: {
-      side: 'Side Menu Layout',
-      top: 'Top Menu Layout',
-      mix: 'Mix Menu Layout'
+      side: 'Left Vertical',
+      top: 'Level Layout',
+      mix: 'Mixed Double Row',
+      leftDouble: 'Left Double Row',
+      tool: 'Left main navigation, Top sub navigation',
     },
     colors: {
       default: 'Daybreak Blue',
@@ -43,8 +45,13 @@ export default {
       green: 'Polar Green',
       geekblue: 'Geek Blue'
     },
+    applicationLocationStyles: {
+      top: 'Top Application',
+      side: 'Sidebar application',
+    },
+    applicationLocation: 'Application Location',
     darkMode: 'Dark Mode',
-    layoutStyle: 'Navigation Mode',
+    layoutStyle: 'Menu Navigation',
     sideMenuStyle: 'Sidebar Double Menu',
     bodyFull: 'Body Fixed Width',
     other: 'Other Setting',

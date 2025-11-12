@@ -29,9 +29,11 @@ export default {
       primary: '主色顶栏'
     },
     layoutStyles: {
-      side: '左侧菜单布局',
-      top: '顶部菜单布局',
-      mix: '混合菜单布局'
+      side: '左侧垂直',
+      top: '水平',
+      mix: '混合双列',
+      leftDouble: '左侧双排',
+      tool: '左侧主导航,顶部子导航',
     },
     colors: {
       default: '拂晓蓝',
@@ -43,8 +45,13 @@ export default {
       green: '极光绿',
       geekblue: '极客蓝'
     },
+    applicationLocationStyles: {
+      top: '顶部应用',
+      side: '侧边栏应用',
+    },
+    applicationLocation: '应用配置',
     darkMode: '开启暗黑模式',
-    layoutStyle: '导航模式',
+    layoutStyle: '菜单导航',
     sideMenuStyle: '侧栏双排菜单',
     bodyFull: '内容区域定宽',
     other: '其它配置',

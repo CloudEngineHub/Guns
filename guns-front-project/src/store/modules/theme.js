@@ -35,9 +35,9 @@ const DEFAULT_STATE = Object.freeze({
   // 侧栏风格: light(亮色), dark(暗色)
   sideStyle: 'dark',
   // 布局风格: side(默认), mix(混合导航), top(顶栏导航)
-  layoutStyle: 'mix',
+  layoutStyle: 'side',
   // 侧栏菜单风格: default(默认), mix(双排侧栏)
-  sideMenuStyle: 'default',
+  sideMenuStyle: 'mix',
   // 页签风格: default(默认), dot(圆点), card(卡片)
   tabStyle: 'default',
   // 是否固定主体
@@ -57,7 +57,9 @@ const DEFAULT_STATE = Object.freeze({
   // 刷新路由时的参数
   routeReload: null,
   // 是否开启响应式
-  styleResponsive: true
+  styleResponsive: true,
+  // 应用配置 default(侧边栏应用), top(顶部应用)
+  applicationStyle: 'top'
 });
 // 延时操作定时器
 let disableTransitionTimer, updateContentSizeTimer;
@@ -251,6 +253,10 @@ export const useThemeStore = defineStore({
       this.styleResponsive = value;
       cacheSetting('styleResponsive', value);
     },
+    setApplicationStyle(value) {
+      this.applicationStyle = value;
+      cacheSetting('applicationStyle', value);
+    },
     /**
      * 切换色弱模式
      * @param value 是否是色弱模式
@@ -337,6 +343,7 @@ export const useThemeStore = defineStore({
         this.styleResponsive = DEFAULT_STATE.styleResponsive;
         this.weakMode = DEFAULT_STATE.weakMode;
         this.color = DEFAULT_STATE.color;
+        this.applicationStyle = DEFAULT_STATE?.applicationStyle;
         localStorage.removeItem(THEME_STORE_NAME);
         Promise.all([changeStyleResponsive(this.styleResponsive), changeWeakMode(this.weakMode), changeTheme(this.color, false)])
           .then(() => {

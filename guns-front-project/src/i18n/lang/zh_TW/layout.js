@@ -29,9 +29,11 @@ export default {
       primary: '主色頂欄'
     },
     layoutStyles: {
-      side: '左側選單佈局',
-      top: '頂部選單佈局',
-      mix: '混合選單佈局'
+      side: '左侧垂直',
+      top: '水平',
+      mix: '混合雙列',
+      leftDouble: '左側双排',
+      tool: '左侧主導航,頂部子導航',
     },
     colors: {
       default: '拂曉藍',
@@ -43,8 +45,13 @@ export default {
       green: '極光綠',
       geekblue: '極客藍'
     },
+    applicationLocationStyles: {
+      top: '頂部應用',
+      side: '側邊欄應用',
+    },
+    applicationLocation: '應用配置',
     darkMode: '開啟暗黑模式',
-    layoutStyle: '導航模式',
+    layoutStyle: '菜單導航',
     sideMenuStyle: '側欄雙排選單',
     bodyFull: '內容區域定寬',
     other: '其它配寘',

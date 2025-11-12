@@ -47,8 +47,8 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
-    // 是否是侧栏双菜单
-    isMixSideMenu: Boolean
+    // 是否顶部应用
+    isApp: String
   },
   emits: ['openChange', 'titleClick', 'appChange'],
   setup(props, { emit, slots }) {
@@ -78,7 +78,7 @@ export default defineComponent({
             linkNode = h('a', { href: item.path, target: '_blank' });
           } else if (isExternalLink(item.redirect)) {
             linkNode = h('a', { href: item.redirect, target: '_blank' });
-          } else if (props.isMixSideMenu) {
+          } else if (props.isApp == 'top') {
             linkNode = h('a');
           } else {
             linkNode = h(RouterLink, { to: item.redirect ? item.redirect : item.path });

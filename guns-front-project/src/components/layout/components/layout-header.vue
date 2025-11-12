@@ -41,7 +41,7 @@
         title-slot="top-title"
         :showIcon="showIcon"
         :selected-keys="currentActive"
-        :is-mix-side-menu="isMixSideMenu"
+        :is-app="applicationStyle"
         @titleClick="onTitleClick"
         @appChange="appChange"
       >
@@ -104,8 +104,8 @@ export default defineComponent({
     // 面包屑导航分隔符
     breadcrumbSeparator: String,
     isMobile: Boolean,
-    // 是否是侧栏双菜单
-    isMixSideMenu: Boolean
+    // 顶部应用配置
+    applicationStyle: String,
   },
   emits: ['logo-click', 'reload-page', 'toggle-collapse', 'title-click'],
   setup(props, { emit }) {
@@ -135,7 +135,7 @@ export default defineComponent({
     });
 
     const headerMenus = computed(() => {
-      if (props.isMixSideMenu) {
+      if (props.applicationStyle == 'top') {
         return appList.value?.map(item => {
           return {
             ...item,
@@ -154,7 +154,7 @@ export default defineComponent({
     });
 
     const currentActive = computed(() => {
-      if (props.isMixSideMenu) {
+      if (props.applicationStyle == 'top') {
         const appId = activeApp.value?.appId;
         return appId ? [appId] : [];
       } else {
@@ -163,7 +163,7 @@ export default defineComponent({
     });
 
     const showIcon = computed(() => {
-      if (props.isMixSideMenu) {
+      if (props.applicationStyle == 'top') {
         return true;
       } else {
         return false;
@@ -192,6 +192,7 @@ export default defineComponent({
 
     // 应用切换
     const appChange = e => {
+      if (props.applicationStyle != 'top') return;
       const item = appList.value.find(a => a.appId == e.key);
       let isNewTab = false;
       if (e.domEvent?.key == 'Control' || e.domEvent?.keyCode == 17 || e.domEvent?.ctrlKey) {
@@ -246,7 +247,7 @@ export default defineComponent({
       toggleCollapse,
       reloadPage,
       onLogoClick,
-      onTitleClick
+      onTitleClick,
     };
   }
 });

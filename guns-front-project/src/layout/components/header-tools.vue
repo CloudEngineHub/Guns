@@ -7,7 +7,7 @@
       <span class="company-name">{{ companyData?.companyName }}</span>
     </div>
     <!-- 应用切换 -->
-    <div class="guns-admin-header-tool-item" @click="switchApp" v-if="props.sideMenuStyle == 'default'">
+    <div class="guns-admin-header-tool-item" @click="switchApp" v-if="props.applicationStyle == 'default'">
       <i class="iconfont icon-nav-yingyong f-s-24"></i>
     </div>
     <!-- 语言切换 -->
@@ -98,12 +98,12 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  // 侧栏菜单模式, default | mix
-  sideMenuStyle: {
+  // 应用配置, default | top
+  applicationStyle: {
     type: String,
     default: 'default',
     validator: value => {
-      return ['default', 'mix'].includes(value);
+      return ['default', 'top'].includes(value);
     }
   }
 });

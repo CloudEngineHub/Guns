@@ -1,7 +1,7 @@
 // 是否使用验证码
 export const CAPTCHA_FLAG = false;
 
-// 是否使用拖拽图形验证码
+//  是否使用拖拽图形验证码
 export const DRAW_CAPTCHA_FLAG = false;
 
 // 是否开启单点登录

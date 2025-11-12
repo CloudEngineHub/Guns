@@ -11,8 +11,8 @@
       :active="headMenuActive"
       :project-name="projectName"
       :show-refresh="showRefresh"
+      :application-style="applicationStyle"
       :show-left-tool="showHeadLeftTool"
-      :is-mix-side-menu="isMixSideMenu"
       :breadcrumb-separator="breadcrumbSeparator"
       :show-collapse="showCollapse && showSideMenu"
       :show-breadcrumb="showBreadcrumb && layoutStyle === 'side'"
@@ -264,6 +264,10 @@ export default defineComponent({
         // 侧栏双排菜单
         {
           'guns-admin-side-mix': isMixSideMenu.value && showSideNav.value
+        },
+        // 顶部应用
+        {
+          'guns-admin-top-app': props.applicationStyle == 'top'
         },
         // logo 宽度自适应
         {
