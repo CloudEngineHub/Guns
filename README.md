@@ -157,7 +157,7 @@ Guns是一个现代化的Java应用开发框架，基于主流技术**Spring Boo
   <tr>
     <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/108d0988.png" /></td>
     <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52c5b334.png" /></td>
-    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/52646809.png" /></td>
+    <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/02b868c3.png" /></td>
     <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/c02c7be7.png" /></td>
     <td><img src="https://gitee.com/stylefeng/guns/raw/master/.README_images/bc2943ac.png" /></td>
   </tr>
